@@ -1,0 +1,84 @@
+/* Gravity Forms CSS Overrides */
+.ginput_preview_list img {
+    height: 100px;
+    width: 100px;
+    object-fit: cover;
+    border-radius: 5px;
+}
+
+.gform_delete_file {
+    color: black;
+}
+
+#gform_7 .ginput_preview {
+    display: flex;
+}
+
+#gform_7 .ginput_preview .attatchment-name {
+    font-size: 12px;
+}
+
+.gpfup input {
+    border-radius: 5px;
+    width: 100%;
+}
+
+.list-group {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    margin-bottom: 8px;
+
+    div.list-group-item {
+        flex-grow: 1;
+        width: 0;
+
+        &:not(:first-child) {
+            margin-left: 2%;
+        }
+
+        input {
+            width: 100%;
+        }
+
+        
+    }
+
+    .second-select {
+        width: 100%;
+    }
+
+    select {
+        line-height: 1;
+    }
+
+    .ts-wrapper {
+        width: 100%; 
+    }
+
+    /* .ts-control {
+      
+        font-size: 16px;
+    }
+
+    .ts-dropdown {
+        font-size: 16px;
+    } */
+}
+
+.list-group-labels {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    margin-bottom: 8px;
+
+    div {
+        flex-grow: 1;
+        width: 0;
+
+        &:not(:first-child) {
+            margin-left: 2%;
+        }
+    }
+}
+

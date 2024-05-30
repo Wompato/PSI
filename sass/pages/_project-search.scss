@@ -1,0 +1,31 @@
+.page-template-advanced-project-search {
+    .site-content {
+        flex-direction: column;
+        margin-top: 80px;
+    }
+
+    form {
+        display: grid;
+        grid-gap: 20px;
+        grid-template-columns: repeat(4, 1fr);
+
+        input[name=project_number],
+        input[name=agency_award_number],
+        input[name=funding_source],
+        input[name=funding_program],
+        input[name=primary_investigator],
+        .date_container,
+        select[name=funding_instrument] {
+            grid-column: span 2;
+        }
+
+        input[name=search] {
+            grid-column: span 3;
+        }
+
+        input[type=submit],
+        button {
+            grid-row: 6;
+        }
+    }
+}

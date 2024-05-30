@@ -1,0 +1,227 @@
+.single-project .content-area {
+    width: 100%;
+}
+
+.single-project #main {
+    margin: 40px;
+}
+
+.single-project .related-staff-carousel-large,
+.single-project .related-staff-carousel-medium,
+.single-project .related-staff-carousel-small,
+.single-project .related-staff-carousel {
+    background-color: #ffffff;
+    height: auto;
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
+.tooltip {
+    position: absolute;
+    background-color: rgb(240, 240, 240);
+    color: black;
+    padding: 10px;
+    border-radius: 4px; 
+    font-size: 14px;
+    max-width: 200px;
+    min-width: 175px;
+    line-height: 1.4;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 999; 
+}
+
+.tooltip::before {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 8px 8px 0;
+  border-color: rgb(240, 240, 240) transparent transparent;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+  
+.project-website {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+  
+.project-website:hover > .tooltip:last-child {
+    opacity: 1;
+}
+
+.projects-category-display {
+    border-bottom: 1px solid black;
+}
+
+.agency-list {
+    margin-bottom: 20px;
+}
+
+.agency-name {
+    display: inline-block;
+    font-size: 18px;
+    font-weight: bold;
+    margin: 0 5px;
+}
+
+.clickable-agency {
+    cursor: pointer;
+}
+
+.clickable-agency.selected {
+    pointer-events: none;
+    text-decoration: underline; 
+}
+
+.programs-list {
+    padding-bottom: 20px;
+}
+
+.ending-content.hide {
+    visibility: hidden;
+    max-height:0;
+    height: 0;
+    overflow:hidden;
+    font-style: normal;
+    opacity: 0;
+    transition: opacity 0.2s;
+    display: block;
+    margin-bottom: 0px;
+}
+
+.ending-content.show {
+    visibility: visible;
+    max-height: 2000px;
+    height: auto;
+    overflow: auto;
+    font-style: normal;
+    display: inline;
+    opacity: 1;
+    transition: opacity 0.2s;
+    margin-bottom: 0px;
+}
+
+#show-hidden-content {
+    cursor: pointer;
+    color: blue;
+    text-align: center;
+}
+
+.single-project #show-more-btn {
+    cursor: pointer;
+    margin: 10px 0;
+    color: blue;
+    font-size: 14px;
+}
+
+.project-banner {
+    display: flex;
+}
+
+.project-title-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.project-title-container h1 {
+    margin: 0;
+}
+
+.project-title-container i {
+    margin-left: 10px;
+    font-size: 35px !important;
+}
+
+.project-info-container {
+    margin-left: 50px;
+}
+
+.project-info-container a.edit-project {
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+.project-tax-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    .pte-container {
+        margin-bottom: 25px;
+
+        p {
+            margin: 0;
+        }
+    }
+}
+
+.pi-container img {
+    height: 200px;
+    width: 200px;
+    object-fit: cover;
+    max-width: none;
+    border-radius: 50%;
+}
+
+.pi-container p {
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.pi-container a {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+}
+
+.pi-container p {
+    margin: 0;
+}
+
+.pi-container > * {
+    margin: 0;
+}
+
+.project-meta-container .project-meta:last-child {
+    margin-left: 50px;
+}
+
+.project-meta {
+    display: inline-block;
+}
+
+.coi-collab-track {
+    margin-bottom: 25px;
+}
+
+/* Modal styles */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 10;
+}
+
+.modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}

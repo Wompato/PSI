@@ -1,0 +1,35 @@
+.loading-dual-ring {
+    display: flex;
+    justify-content: center;
+    margin: 0 auto;
+    margin-top: 10px;
+
+    &::after {
+        content: " ";
+        display: block;
+        width: 64px;
+        height: 64px;
+        margin: 8px;
+        border-radius: 50%;
+        border: 6px solid #444444;
+        border-color: #444444 transparent #444444 transparent;
+        animation: loading-dual-ring 1.2s linear infinite;
+    }
+}
+
+.loader-container {
+    text-align: center;
+}
+
+.project-loader-container {
+    text-align: center;
+}
+
+@keyframes loading-dual-ring {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+}

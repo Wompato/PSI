@@ -1,0 +1,341 @@
+/* User Profile Styles */
+
+.page-template-user-profile {
+
+    .entry-content {
+        margin: 0 25px;
+    }
+
+    article {
+        width: 100%;
+    }
+
+    h4 {
+        font-size: 20px;
+        display: inline-block;
+        width: 100%;
+        margin-bottom: 20px;
+        text-transform: uppercase;
+    }
+
+    section {
+        margin-bottom: 80px;
+
+        &:first-of-type {
+            margin-top: 50px;
+            margin-bottom: 40px;
+        }
+
+        &.additional-staff-info {
+            margin-bottom: 80px;
+
+            .staff-info {
+                margin-bottom: 0px;
+                font-style: italic;
+            }
+        }
+
+        &.staff__banner {
+            display: flex;  
+
+            .staff__headshot {
+                height: 350px;
+                width: 350px;
+                object-fit: cover;
+                border-radius: 50%;
+            }
+
+            .staff-info__container {
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                margin-left: 50px;
+
+                .optional-staff-links {
+                    display: flex;
+                    flex-direction: column;
+                }
+            
+                
+                .staff__title {
+                    font-size: 2.5rem;
+                    margin-bottom: 10px;
+                }
+
+                .staff-info {
+                    margin-bottom: 0px;
+                    font-style: italic;
+                }
+
+                .staff__position {
+                    font-size: 1.6rem;
+                    font-weight: bold;
+                    margin-bottom: 10px;
+                    font-style:normal;
+                }
+
+                .staff-info__social {
+                    list-style-type: none;
+                    margin: 0;
+                    margin-top: 0px;
+                    display: flex;
+                    margin-top: 10px;
+
+                    & li {
+                        margin-right: 10px;
+                    }
+
+                    & li .social-icon {
+                        background-color: white;
+                        font-size: 26px;
+                    }
+
+                    i,svg {
+                        cursor: pointer;
+                    }
+
+                    svg {
+                        width: 27px;
+                    }
+                }
+            }
+        }
+
+        &.staff-pi__container {
+
+            .optional-image-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                grid-gap: 20px;
+                margin-top: 40px;
+
+                img {
+                    border-radius: 5px;
+                }
+            }
+        }
+
+        
+    }
+
+    #past-projects,
+    #active-projects {
+        cursor: pointer;
+        text-decoration-line: underline;
+    }
+
+    #load-more-related-projects,
+    #load-more-past-projects {
+        display: inline-block;
+        background-color: #444444;
+        color: white;
+        margin-top: 25px;
+        padding: 15px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+
+        i {
+            padding-left: 0.5em;
+            transition: all 0.5s ease;
+        }
+    }
+}
+
+/* .related-users-list {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+} */
+
+/* #acf-user-edit > div:first-child{
+    padding: 16px;
+} */
+
+/* .btn-container-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#menu-item-upload,
+#menu-item-browse {
+    color: black;
+} */
+
+/* .caption-button {
+    cursor: pointer;
+    padding: 10px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+} */
+
+/* Staff Directory Responsive CSS */
+
+.page-template-user-profile {
+
+    .entry-content {
+
+        @media screen and (max-width: 1080px) {
+    
+            #related-posts-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        
+            #load-more-posts-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        
+            /* .project-info-container h3 {
+                margin-bottom: 46px;
+            } */
+        }
+        
+        @media screen and (max-width: 1000px) {
+            .widget ul li.related-user {
+                flex-direction: column;
+            }
+            .widget .related-staff-heading {
+                text-align: center;
+            }
+        }
+        
+        
+        @media screen and (max-width: 958px) {
+            .activity-banner {
+                height: auto;
+                grid-row-gap: 10px;
+            }
+        
+            .activity-banner__primary-investigator {
+                grid-column: span 2;
+            }
+        
+            .activity-banner__content {
+                grid-column: span 2;
+            }
+        
+            .activity-banner .project-image-container {
+                grid-column: span 2;
+                text-align: center;
+            }
+        
+            .activity-banner .project-image {
+                
+                height: 300px;
+            }
+        
+            .activity-banner .project-team {
+                height: 300px;
+                grid-column: span 2;
+            }
+        }
+        
+        
+        @media screen and (max-width: 768px) {
+            .widget ul li.related-user {
+                flex-direction: row;
+            }
+            .widget .related-staff-heading {
+                text-align: left;
+            }
+        }
+        
+        @media screen and (max-width: 745px) {
+            #related-posts-grid {
+                grid-template-columns: 1fr;
+            }
+        
+            
+            .project-meta-container .project-meta:last-child {
+                margin-left: 0;
+                margin-top: 10px;
+            }
+        
+            .activity-banner {
+                grid-template-columns: 1fr;
+                height: auto;
+                grid-gap: 10px;
+            }
+        
+            .activity-banner .project-team {
+                height: 300px;
+                text-align: left;
+            }
+        
+            .activity-banner .project-team img {
+                margin: 0;
+            }
+        
+            #load-more-posts-container {
+                grid-template-columns: repeat(1, 1fr);
+            }
+        }
+        
+        @media screen and (max-width: 660px) {
+             
+            .staff__banner img {
+                height: 250px;
+                width: 250px;
+            }
+            
+        }
+        
+        @media screen and (max-width: 540px) {
+            .staff__banner {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            .staff-info__container {
+                margin: 0px;
+                margin-top: 40px;
+                width: 100%;
+            }
+        
+            .page-template-user-profile section:first-of-type {
+                margin-top: 40px;
+                margin-bottom: 60px;
+            }
+            
+            .page-template-user-profile section.staff__banner .staff-info__container {
+                margin-left: 0;
+            }
+        
+            .page-template-user-profile section.staff__banner .staff__headshot {
+                height: 325px;
+            }
+        
+            .pi-container img {
+                height: 125px;
+                width: 125px;
+            }
+            .project-info-container {
+                margin-left: 25px;
+            }
+            .project-info-container h1 {
+                font-size: 25px;
+            }
+            .project-info-container h3 {
+                font-size: 18px;
+            }
+            .project-meta {
+                font-size: 15px;
+            }
+            .project-meta-container .project-meta:last-child {
+                margin-left: 0;
+                margin-top: 10px;
+            }
+            .single-project .related-staff-carousel-large {
+                padding: 0;
+            }
+        
+            
+        }
+    }
+
+
+}

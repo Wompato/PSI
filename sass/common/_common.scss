@@ -1,0 +1,223 @@
+.section-headline {
+    text-align: center;
+    padding-bottom: 5px;
+    border-bottom-width: 10px;
+    border-bottom-style: solid;
+    border-bottom-color: #222222;
+}
+
+.seperator {
+    border-bottom: 1px dashed black;
+    margin: 5px auto;
+}
+
+/* Single Post Style */
+.featured-image-container {
+    position: relative;
+}
+
+/* Staff Directory Ninja Tables CSS */
+img.table-profile-picture {
+    object-fit: cover;
+    height: 100px;
+    width: 100px;
+    border-radius: 50%;
+}
+
+/* Slick CSS Overrides */
+.slick-list {
+    margin: 0 25px;
+}
+
+.slick-track {
+    margin: 0;
+}
+
+.slick-initialized .slick-slide {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.coi-collab-track {
+    visibility: hidden;
+}
+.coi-collab-track.slick-initialized {
+    visibility: visible;
+}
+
+/* Press Submission Form Styling */
+.project-item {
+    
+    margin: 0 0 10px 0;
+    
+    p {
+        margin: 0;
+    }
+    a {
+        font-size: 1rem;
+    }
+
+
+}
+
+/* Custom User Profile Update Form Styles */
+
+.image-uploader .show-if-value {
+    position: relative;
+}
+
+.show-if-value {
+    width: 25%;
+}
+
+.custom-actions a {
+    cursor: pointer;
+}   
+
+.upload-preview {
+    width: 100%;
+}
+
+.image-uploader .show-if-value:hover .acf-actions {
+    display: block; 
+}
+
+.preview-icon.-pencil::before {
+    content: "\f464";
+  }
+  .preview-icon::before {
+    font-family: dashicons;
+    display: inline-block;
+    line-height: 1;
+    font-weight: 400;
+    font-style: normal;
+    text-decoration: inherit;
+    text-transform: none;
+    text-rendering: auto;
+    width: 1em;
+    height: 1em;
+    vertical-align: middle;
+    text-align: center;
+  }
+  
+  .preview-icon.dark {
+    border-color: transparent !important;
+    background: #23282d;
+    color: #eee;
+  }
+  .preview-icon {
+    color: #555d66;
+    border-color: #b5bcc2;
+    background-color: #fff;
+    position: relative;
+    transition: none;
+    cursor: pointer;
+  }
+
+  .project-content {
+    overflow: hidden;
+}
+.project-content.show-full {
+    overflow: visible;
+}
+.project-description-show-more {
+    display: block;
+    margin-top: 10px;
+    cursor: pointer;
+  color: blue;
+  text-align: center;
+}
+
+.project-description-show-more:focus,
+.project-description-show-more:active {
+    color: blue;
+}
+
+.project-description-text.show {
+    height: 220px;
+    overflow: hidden;
+}
+    
+.project-description-text.not-show {
+    overflow: visible;
+}
+
+
+#advanced-search-form {
+    display: grid;
+    grid-template-rows: auto 0px; /* Adjusted to accommodate the header */
+    padding: 20px 20px;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    background-color: #f0f0f0;
+    border-radius: 5px;
+    transition: grid-template-rows 250ms;
+    cursor: pointer;
+}
+
+#advanced-search-form div:last-child {
+    overflow: hidden;
+}
+
+#advanced-search-form.expanded {
+    grid-template-rows: auto 200px; /* Make sure both rows adjust as needed when expanded */
+}
+
+#search-header {
+    font-size: 16px; /* Example styling for the header */
+    font-weight: bold;
+    margin-bottom: 10px; /* Space between the header and the form inputs */
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Space between icon and text */
+}
+
+.fa-search { /* Style your icon accordingly */
+    color: #333; /* Example color */
+}
+
+.search-inputs {
+    width: 570px;
+    cursor: auto;
+}
+
+.search-inputs input[name=search_keyword] {
+    padding: 5px 10px;
+    border-radius: 5px;
+    display: inline-block;
+    margin-left: 5px;
+    width: 63%;
+}
+
+.search-inputs button[type=submit],
+.search-inputs button[type=button] {
+    width: 100px;
+    border-radius: 5px;
+}
+
+.search-inputs .search-dates {
+    display: flex;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    cursor: auto;
+}
+
+.search-inputs .search-dates div {
+    display: flex;
+    flex-direction: column;
+    margin-left: 45px;
+}
+
+#toggleIcon {
+    transition: transform 250ms ease-in-out; /* Ensure the transition is on the main class */
+}
+
+.icon-rotated {
+    transform: rotate(180deg); /* Rotates the icon 180 degrees */
+    transition: transform 250ms ease-in-out; /* Smooth transition for rotation */
+}
+
+#clearButton {
+    margin-left: 20px;
+}

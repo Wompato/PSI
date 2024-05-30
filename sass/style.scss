@@ -1,0 +1,25 @@
+/*
+ Theme Name:   GeneratePress Child
+ Theme URI:    https://generatepress.com
+ Description:  Default GeneratePress child theme
+ Author:       Tom Usborne
+ Author URI:   https://tomusborne.com
+ Template:     generatepress
+ Version:      0.1
+*/
+
+@import 'pages/user-profile';
+@import 'pages/honors-awards';
+@import 'pages/professional-history';
+@import 'pages/project-archive';
+@import 'pages/project-search';
+@import 'pages/single-project';
+@import 'forms/user-update-form';
+@import 'forms/gforms';
+@import 'common/common';
+@import 'components/load-more-posts';
+@import 'components/loading-spinner';
+@import 'components/related-posts';
+@import 'components/related-staff';
+@import 'components/activity-banner';
+

@@ -1,0 +1,86 @@
+.related-posts {
+    text-align: center;
+
+    #related-posts-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 40px;
+
+        /* Important fix for Slick Slider JS Library where width isn't calculated properly without this */
+        div {
+            min-width: 0
+        }
+
+        .related-post__item {
+            text-align: left;
+
+            .related-post__container {
+                background-repeat: no-repeat;
+                background-position: center center;
+                background-size: cover;
+                border-top-right-radius: 5px;
+                border-top-left-radius: 5px;
+                min-height: 400px;
+                display: flex;
+                position: relative;
+                flex-direction: column;
+                justify-content: center;
+                color: white;
+
+                &::before {
+                    content: "";
+                    background-color: #222222;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    opacity: 0.25;
+                    border-top-right-radius: 5px;
+                    border-top-left-radius: 5px;
+                }
+
+                .related-post__category,
+                .related-post__date {
+                    position: relative;
+                    padding: 0 30px;
+                    margin-bottom: 5px;
+                }
+
+                svg {
+                    position: relative;
+                    margin-right: 6px;
+                }
+
+                h3 {
+                    padding: 0 30px;
+                    max-width: 75%;
+                    position: relative;
+                    margin-bottom: 10px;
+                }
+
+                a {
+                    color: white;
+                }
+
+            }
+
+            
+        }
+    }
+
+    #load-more-related-posts {
+        display: inline-block;
+        background-color: #444444;
+        color: white;
+        margin-top: 25px;
+        padding: 15px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+
+        i {
+            padding-left: 0.5em;
+            transition: all 0.5s ease;
+        }
+    }
+}

@@ -1,0 +1,286 @@
+.activity-banner {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    height: 300px;
+    margin-bottom: 50px;
+    margin-top: 25px;
+}
+
+.activity-banner .project-image-container img {
+    max-height: 300px;
+}
+
+.activity-banner__primary-investigator {
+    text-align: center;
+    border-left: 1px dashed rgb(34, 34, 34);
+    border-right: 1px dashed rgb(34, 34, 34);
+    padding: 0 10px;
+}
+
+.activity-banner__primary-investigator h4 {
+    margin-bottom: 5px;
+    font-size: 18px;
+}
+
+.activity-banner__primary-investigator a {
+    text-decoration: none;
+}
+
+.activity-banner__primary-investigator img {
+    height: 230px;
+    width: 230px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.activity-banner__primary-investigator p {
+    margin: 0;
+    font-size: 16px;
+}
+
+.activity-banner__content {
+    margin: 0 15px;
+}
+
+.activity-banner__content h3 {
+    font-size: 20px;
+    max-width: 280px;
+}
+
+.activity-banner__content h4 {
+    font-size: 16px;
+    margin-bottom: 5px;
+    text-align: left;
+}
+
+.activity-banner__content h3 a {
+    font-size: 22px;
+    text-decoration: none;
+    color: black;
+}
+
+.activity-banner .project-image {
+    border-radius: 5px;
+}
+
+.activity-banner .project-team {
+    text-align: center;
+}
+
+.activity-banner .project-team h4 {
+    margin-bottom: 5px;
+    font-size: 18px;
+}
+
+.activity-banner .project-team a {
+    flex-direction: initial;
+    justify-content: start;
+    margin-bottom: 10px;
+}
+
+.activity-banner .project-team img {
+    margin-left: 50px;
+    height: 80px;
+    width: 80px;
+}
+
+.activity-banner .project-team span {
+    margin-left: 15px;
+}
+
+.activity-banner.institutional-pi
+.activity-banner__primary-investigator img {
+    height: 160px;
+    width: 160px;
+}
+
+.project-team-member-container {
+    overflow-y: scroll;
+    height: auto;
+    max-height: 270px;
+
+    .staff-member {
+        flex: 0 0 auto;
+        max-width: 300px; 
+        text-align: center;
+
+        a, div, p{
+            flex-direction: initial;
+            justify-content: start;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .pte-member {
+            display: block;
+            text-align: left;
+            max-width: 200px;
+            margin: 0 auto;
+            margin-bottom: 10px;
+            margin-top: 20px;
+        }
+
+        p {
+            margin: 0;
+        }
+
+        img {
+            margin-left: 50px;
+            height: 80px;
+            width: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        span {
+            margin-left: 15px;
+            text-align: left;
+        }
+    }
+}
+
+
+@media screen and (max-width: 958px) {
+    .activity-banner {
+        height: auto;
+        grid-row-gap: 10px;
+    }
+
+    .activity-banner__primary-investigator {
+        grid-column: span 2;
+        border: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        .seperator {
+            width: 100%;
+        }
+
+        p {
+            max-width: 260px;
+        }
+    }
+
+    .activity-banner__content {
+        grid-column: span 2;
+        margin: 0;
+    }
+
+    .activity-banner .project-image-container {
+        grid-column: span 2;
+        text-align: center;
+    }
+
+    .activity-banner .project-image {
+        height: 300px;
+    }
+
+    .activity-banner .project-team {
+        height: auto;
+        grid-column: span 2;
+
+        h4 {
+            text-align: left;
+        }
+
+        .staff-member .pte-member {
+            margin-left: 0;
+        }
+    }
+}
+
+@media screen and (max-width: 745px) {
+    
+    
+    .project-meta-container .project-meta:last-child {
+        margin-left: 0;
+        margin-top: 10px;
+    }
+
+    .activity-banner {
+        grid-template-columns: 1fr;
+        height: auto;
+        grid-gap: 10px;
+    }
+
+    .activity-banner__content {
+        text-align: center;
+        
+        h3 {
+            max-width: none;
+            margin-bottom: 10px;
+        }
+
+        h4 {
+            text-align: center;
+        }
+    }
+
+    .activity-banner .project-team {
+        height: auto;
+        text-align: left;
+    }
+
+    .activity-banner .project-team img {
+        margin: 0;
+    }
+
+    #load-more-posts-container {
+        grid-template-columns: repeat(1, 1fr);
+    }
+}
+
+@media screen and (max-width: 540px) {
+    
+
+    .pi-container img {
+        height: 125px;
+        width: 125px;
+    }
+    .project-info-container {
+        margin-left: 25px;
+    }
+    .project-info-container h1 {
+        font-size: 25px;
+    }
+    .project-info-container h3 {
+        font-size: 18px;
+    }
+    .project-meta {
+        font-size: 15px;
+    }
+    .project-meta-container .project-meta:last-child {
+        margin-left: 0;
+        margin-top: 10px;
+    }
+   
+
+    .activity-banner__content {
+        border-bottom: 1px dashed black;
+        padding-bottom: 15px;
+
+        a {
+            font-size: 16px;
+        }
+    }
+    .activity-banner {
+        .project-team {
+            h4 {
+                text-align: center;
+            }
+        }
+        .project-team-member-container .staff-member {
+            margin-left: 100px;
+            margin-right: auto;
+
+            
+
+            
+        }
+    }
+
+}
