@@ -7,14 +7,9 @@ use PSI\Forms\FormHandler;
 class StaffManager {
     public function __construct() {
 
-        // Article Forms
-        add_action('gform_after_submission_13', array($this, 'create_article'), 10, 2);
-        add_action('gform_after_submission_16', array($this, 'update_article'), 10, 2);
-        // for the create project form, this allows for 1000 posts to be queries by the related CS/PR section.
-        add_filter( 'gppa_query_limit_16_1', function( $query_limit, $object_type ) {
-            // Update "10000" to the maximum number of results that should be returned for the query populating this field.
-            return 10000;
-        }, 10, 2 );
+        add_action('gform_after_submission_11', array($this, 'create_staff_page'), 20, 2);
+        add_action('gform_after_submission_12', array($this, 'update_staff_page'), 20, 2);
+       
     }
 
         /**

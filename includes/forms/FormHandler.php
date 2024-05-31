@@ -174,38 +174,38 @@ class FormHandler {
     public static function get_post_date_time_fields($date, $time) {
         // Retrieve the WordPress time zone setting
         $wp_timezone = get_option('timezone_string');
-        $timezone = new DateTimeZone($wp_timezone ?: 'UTC');
+        $timezone = new \DateTimeZone($wp_timezone ?: 'UTC');
     
         
-        $converted_date = !empty($date) ? new DateTime($date, $timezone) : new DateTime('now', $timezone);
+        $converted_date = !empty($date) ? new \DateTime($date, $timezone) : new DateTime('now', $timezone);
         $formatted_date = $converted_date->format('Y-m-d');
     
         // Convert time from "hh:mm am/pm" to "H:i:s"
-        $converted_time = !empty($time) ? DateTime::createFromFormat('h:i a', $time) : false;
+        $converted_time = !empty($time) ? \DateTime::createFromFormat('h:i a', $time) : false;
         
         // Check if $converted_time is false
         if ($converted_time === false) {
             // Handle the case where $converted_time is false
-            throw new Exception('Invalid time format: ' . $time);
+            throw new \Exception('Invalid time format: ' . $time);
         }
     
         $formatted_time = $converted_time->format('H:i:s');
     
         // Combine date and time
         if($formatted_time){
-            $post_date = new DateTime("{$formatted_date} {$formatted_time}", $timezone);
+            $post_date = new \DateTime("{$formatted_date} {$formatted_time}", $timezone);
         }
         else{
-            throw new Exception('Formatted time is empty.');
+            throw new \Exception('Formatted time is empty.');
         }
-        $current_date = new DateTime('now', $timezone);
+        $current_date = new \DateTime('now', $timezone);
     
         // Determine post status based on whether the date is in the future
         $post_status = ($post_date > $current_date) ? 'future' : 'publish';
     
         // Format post date for local time and GMT
         $post_date_formatted = $post_date->format('Y-m-d H:i:s');
-        $post_date_gmt = $post_date->setTimezone(new DateTimeZone('GMT'))->format('Y-m-d H:i:s');
+        $post_date_gmt = $post_date->setTimezone(new \DateTimeZone('GMT'))->format('Y-m-d H:i:s');
     
         // Return the relevant fields
         return array(
