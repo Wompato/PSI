@@ -15,7 +15,27 @@ class GravityFormsCustomizations {
     private function initHooks() {
         add_filter('gppa_process_template_value', [$this, 'processTemplateValue'], 10, 7);
         add_filter('gppa_live_merge_tag_value', [$this, 'liveMergeTagValue'], 10, 5);
+		add_filter('gppa_process_template_value', [$this, 'processTemplateDate'], 10, 8);
+
     }
+
+	/**
+	* Convert entry's "date_created" value from the database format (e.g. ISO 8601) to the datepicker format (e.g. m/d/Y)
+	* when populating into a Date field.
+	* Used for form 16 (edit article)
+	*/
+	public function processTemplateDate( $value, $field, $template_name, $populate, $object, $object_type, $objects, $template ) {
+		if($field->formId == 16) {
+			if($field->id == 13) {
+				$date = new DateTime($value);
+				$value = $date->format('m/d/Y');
+			}
+			if($field->id == 14) {
+				$value = date_format( date_create_from_format( 'Y-m-d H:i:s', $value ), 'h:i A' );
+			}
+		}
+		return $value;
+	}
 
     public function processTemplateValue($template_value, $field, $template_name, $populate, $object, $object_type, $objects) {
         if (strpos($field->cssClass, 'gppa-format-acf-date') === false) {
