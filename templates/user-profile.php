@@ -9,21 +9,22 @@ get_header();
 $user_slug = get_query_var('user_nicename');
 
 // Retrieve the user based on the 'user_slug' meta field
-$user= get_users(array(
+$user = get_users(array(
     'meta_key'   => 'user_slug',
     'meta_value' => $user_slug,
     'number'     => 1, // Limit the result to one user
 ));
 
-
-// ADD 404 PAGE ON FAIL
-if($user && $user[0]){
-    $user_data = $user[0]->data;
-} else {
-    echo "No staff member found for {$user_slug}";
+if (!$user || empty($user)) {
+    // Set HTTP status code to 404 and redirect to the 404 page
+    status_header(404);
+    nocache_headers();
+    include(get_404_template());
     exit;
 }
 
+// If user is found, proceed with your logic
+$user_data = $user[0]->data;
 
 $user_id = $user_data->ID;
 

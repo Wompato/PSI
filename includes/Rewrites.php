@@ -9,6 +9,7 @@ class Rewrites {
         add_action('init', array($this, 'custom_rewrite_rules'));
         add_filter('query_vars', array($this, 'custom_query_vars'));
         add_action('wp_loaded', array($this, 'flush_rewrite_rules'));
+        add_action('template_redirect', array($this, 'restrict_access'));
     }
 
     public static function getInstance() {
@@ -52,4 +53,13 @@ class Rewrites {
             update_option('psi_rewrite_rules_flushed', '1');
         }
     }
+
+    public function restrict_access() {
+        $restricted_pages = ['professional-history', 'honors-and-awards'];  // Add other pages as needed
+        if (in_array(get_query_var('pagename'), $restricted_pages) && !get_query_var('user_nicename')) {
+            wp_redirect(home_url());  // Redirect to the homepage or to a 404 page
+            exit;
+        }
+    }
+    
 }
