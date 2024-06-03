@@ -136,5 +136,43 @@ class PSI_User {
         }
         return $redirect_to;
     }
+
+
+    public static function generate_unique_user_slug($first_name, $last_name, $user_id = null) {
+        $base_slug = sanitize_title($first_name . '-' . $last_name); // Create a basic slug
+        $user_slug = $base_slug;
+        $i = 1;
+    
+        // Use self:: to refer to the current class
+        while (self::user_slug_exists($user_slug, $user_id)) {
+            $user_slug = $base_slug . '-' . $i; // Append suffix
+            $i++;
+        }
+    
+        return $user_slug;
+    }
+    
+
+    public static function user_slug_exists($slug, $current_user_id = null) {
+        global $wpdb;
+        // Correct the table and query to check usermeta
+        $query = $wpdb->prepare(
+            "SELECT user_id FROM $wpdb->usermeta WHERE meta_key = 'user_slug' AND meta_value = %s",
+            $slug
+        );
+        $users = $wpdb->get_results($query);
+    
+        if (empty($users)) {
+            return false;
+        }
+    
+        // If we're checking for a unique slug in the context of updating a user, exclude the current user's existing slug
+        if ($current_user_id && count($users) === 1 && $users[0]->user_id == $current_user_id) {
+            return false;
+        }
+    
+        return true;
+    }
+    
     
 }

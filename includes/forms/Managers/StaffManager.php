@@ -3,6 +3,7 @@
 namespace PSI\Forms\Managers;
 
 use PSI\Forms\FormHandler;
+use PSI\Users\PSI_User;
 
 class StaffManager {
     public function __construct() {
@@ -48,7 +49,7 @@ class StaffManager {
         // Display name without prefix
         $display_name = trim(implode(' ', array_filter([$f_name, $m_name, $l_name])));
 
-        $user_slug = trim(strtolower($f_name . '-' . $l_name));
+        $user_slug = PSI_User::generate_unique_user_slug($f_name, $l_name, $user_id);
 
         $address = $state . ' '. $country;
     
