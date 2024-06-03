@@ -8,6 +8,7 @@ class PSI_Child_Theme {
         PSI\Users\PSI_User::getInstance();
         PSI\Rewrites::getInstance();
         PSI\Shortcodes\PSI_Shortcodes::getInstance();
+        PSI\Widgets\Widget_Loader::getInstance();
         PSI\Forms\FormHandler::getInstance();
 
         add_action('rest_api_init', [PSI\API\Endpoints::class, 'register_endpoints']);
