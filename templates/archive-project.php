@@ -18,12 +18,8 @@ $funding_agencies = get_terms(array(
     'hide_empty' => true, // Show even if they don't have projects associated
 ));
 
-// Check if a funding agency is selected
-$selected_agency_id = isset($_GET['agency_id']) ? $_GET['agency_id'] : '784';
-
 // Get the default program ID
-$nasa_agency = get_term_by('slug', 'nasa', 'funding-agency');
-$default_program_id = $nasa_agency ? $nasa_agency->term_id : '';
+$nasa = get_term_by('slug', 'nasa', 'funding-agency');
 
 // Create an array to store the ordered terms
 $ordered_agencies = array();
@@ -84,8 +80,6 @@ foreach ($funding_agencies as $agency) {
 ?>
 
 <div class="archive-navigation">
-   <!--  <h4>Funding Agencies</h4>
-    <div class="section-headline"></div> -->
     <ul class="agency-list">
         <?php foreach ($ordered_agencies as $agency) : ?>
             <?php
@@ -93,22 +87,19 @@ foreach ($funding_agencies as $agency) {
             $programs = get_field('related_programs', 'funding-agency_' . $agency->term_id);
             if (!$programs) {
                 continue;
-            }
-            $is_current = ($agency->term_id == $selected_agency_id) ? 'active-link' : '';
-            $agency_link = esc_url(remove_query_arg('program_id', add_query_arg('agency_id', $agency->term_id)));
+            }         
             ?>
-            <li><a href="<?php echo $agency_link; ?>" class="<?php echo $is_current; ?>"><?php echo $nickname ? $nickname : $agency->name; ?></a></li>
+            <li><a data-term-id="<?php echo $agency->term_id; ?>" href="#" class="funding-agency-link <?php echo ($agency->slug === 'nasa') ? 'current' : ''; ?>"><?php echo $nickname ? $nickname : $agency->name; ?></a></li>
         <?php endforeach; ?>
     </ul>
 </div>
 
-<?php if (!empty($selected_agency_id)) : ?>
-    <div class="archive-programs">
-        
 
-        <?php
+<div class="archive-programs">
+
+    <?php
         // Get related programs for the selected agency
-        $programs = get_field('related_programs', 'funding-agency_' . $selected_agency_id);
+        $programs = get_field('related_programs', 'funding-agency_' . $nasa->term_id);
 
         // Filter out programs without posts which are active projects
         $filtered_programs = array();
@@ -156,79 +147,26 @@ foreach ($funding_agencies as $agency) {
                 return strcasecmp($program_a->name, $program_b->name);
             });
 
-            $default_program_id = !empty($filtered_programs) ? $filtered_programs[0] : '';
-            $selected_program_id = isset($_GET['program_id']) ? $_GET['program_id'] : $default_program_id;
             ?>
 
             <?php if (!empty($filtered_programs)) : ?>
                 <ul class="program-list">
                     <?php foreach ($filtered_programs as $program_id) : ?>
-                        <?php
-                        $program = get_term($program_id, 'funding-program');
-                        $is_current = ($program->term_id == $selected_program_id) ? 'active-link' : '';
-                        $program_link = esc_url(add_query_arg(array('agency_id' => $selected_agency_id, 'program_id' => $program_id), get_permalink()));
-                        ?>
-                        <li><a class="<?php echo $is_current; ?>" href="<?php echo $program_link; ?>"><?php echo $program->name; ?></a></li>
+                        <?php $program = get_term($program_id, 'funding-program'); ?>
+                        <li><a data-program-id = <?php echo $program->term_id; ?> class="funding-program-link" href="#"><?php echo $program->name; ?></a></li>
                     <?php endforeach; ?>
                 </ul>
             <?php else : ?>
                 <p>Sorry, there are no programs for this funding agency which have active projects.</p>
             <?php endif; ?>
         <?php endif; ?>
-    </div>
-<?php endif; ?>
+</div>
 
-<?php if (!empty($programs)) : ?>
-    <div class="archive-past-projects">
-        <h4><?php echo ($selected_program_id) ? 'Projects from ' . get_term($selected_program_id, 'funding-program')->name : 'Active Projects'; ?></h4>
-        <div class="section-headline"></div>
 
-        <?php
-        // Query for active projects associated with the selected program
-        $args = array(
-            'post_type' => 'project',
-            'posts_per_page' => 5, // Number of projects per page
-            'paged' => get_query_var('paged') ? get_query_var('paged') : 1, // Get current page number
-            'tax_query' => array(
-                array(
-                    'taxonomy' => 'funding-program',
-                    'terms' => $selected_program_id,
-                    'operator' => 'IN',
-                ),
-            ),
-            // Custom meta query to check for active projects based on end_date
-            'meta_query' => array(
-                array(
-                    'key' => 'end_date',
-                    'value' => date('Y-m-d'), // Today's date
-                    'compare' => '>', // Check if end date is after the current date
-                    'type' => 'DATE',
-                ),
-            ),
-        );
+<div class="active-projects">
+    <h4></h4>
+    <div class="project-list"></div>
+</div>
 
-        $projects_query = new WP_Query($args);
-
-        // Display active projects
-        if ($projects_query->have_posts()) : ?>
-            <div>
-                <ul>
-                    <?php while ($projects_query->have_posts()) : $projects_query->the_post(); ?>
-                        <?php get_template_part('template-parts/projects/activity-banner', '', array('post' => $post)); ?>
-                    <?php endwhile; ?>
-                </ul>
-            </div>
-        <?php else : ?>
-            <p>Sorry, no Active Projects found.</p>
-        <?php endif; ?>
-
-        <!-- Pagination -->
-        <div class="pagination">
-            <?php echo paginate_links(array('total' => $projects_query->max_num_pages, 'current' => max(1, get_query_var('paged')))); ?>
-        </div>
-
-        <?php wp_reset_postdata(); ?>
-    </div>
-<?php endif; ?>
 
 <?php get_footer(); ?>

@@ -9,6 +9,8 @@ class Dynamic_Category_Archive extends \WP_Widget {
             'Dynamic Category Archive',
             array('description' => 'Display an archive by year for posts in the current category.')
         );
+
+        add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
     }
 
     public function widget($args, $instance) {
@@ -76,15 +78,3 @@ class Dynamic_Category_Archive extends \WP_Widget {
         return $instance;
     }
 }
-
-// Register the widget
-function register_dynamic_category_archive_widget() {
-    register_widget('PSI\Widgets\Dynamic_Category_Archive');
-}
-add_action('widgets_init', 'register_dynamic_category_archive_widget');
-
-// Enqueue the scripts
-function enqueue_psi_category_archive_scripts() {
-    wp_register_script('psi-category-archive-script', get_stylesheet_directory_uri() . '/js/widgets/psi-category-archive.js', array('jquery'), '1.0', true);
-}
-add_action('wp_enqueue_scripts', 'enqueue_psi_category_archive_scripts');

@@ -8,7 +8,7 @@ class PSI_Child_Theme {
         PSI\Users\PSI_User::getInstance();
         PSI\Rewrites::getInstance();
         PSI\Shortcodes\PSI_Shortcodes::getInstance();
-        PSI\Widgets\Widget_Loader::getInstance();
+        PSI\Widgets\Widget_Loader::init();
         PSI\Forms\FormHandler::getInstance();
 
         add_action('rest_api_init', [PSI\API\Endpoints::class, 'register_endpoints']);
@@ -161,6 +161,14 @@ class PSI_Child_Theme {
         if(is_singular('project')){
             wp_enqueue_script('single-project-scripts', get_stylesheet_directory_uri() . '/js/projects/project.js', array('jquery'), '1.4', true);
             //wp_enqueue_script('user-profile-scripts', get_stylesheet_directory_uri() . '/js/script.js', array('jquery'), '1.1', true);
+        }
+
+        if(is_page('active-projects')){
+            wp_enqueue_script('active-projects-scripts', get_stylesheet_directory_uri() . '/js/projects/active-projects.js', array('jquery'), '1.0', true);
+        }
+
+        if(is_page('past-projects')){
+            wp_enqueue_script('past-projects-scripts', get_stylesheet_directory_uri() . '/js/projects/past-projects.js', array('jquery'), '1.0', true);
         }
 
         if(is_page('edit-staff-page')){

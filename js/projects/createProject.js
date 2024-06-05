@@ -13,6 +13,8 @@ const extractUserIDs = (serializedArray) => {
     return [];
 };
 
+
+
 function getUsers() {
     return new Promise((resolve, reject) => {
         jQuery.ajax({

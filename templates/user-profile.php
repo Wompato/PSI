@@ -3,6 +3,7 @@
 
 /* Template Name: User Profile */
 use PSI\Users\PSI_User;
+use PSI\Utils;
 
 get_header();
 
@@ -253,14 +254,12 @@ $related_projects = get_field('related_projects_and_initiatives', 'user_' . $use
                 </section>
             <?php } ?>
             <?php if ($related_projects) { 
-                //$post_data = $psi_theme->generate_initial_related_posts(4, 'related_projects_and_initiatives', 'user_' . $user_id);
-
                 $has_past_projects = false;
                 $has_active_projects = false;
                 $posts_per_page = 4;
 
                 $active_related_posts = array_filter($related_projects, function($post) use (&$has_past_projects, &$has_active_projects) {
-                    if (!PSI_Child_Theme::is_past_project($post)) {
+                    if (!Utils::is_past_project($post)) {
                         // If it's an active project, return true to keep it in the filtered array
                         $has_active_projects = true;
                         return true;
@@ -273,13 +272,17 @@ $related_projects = get_field('related_projects_and_initiatives', 'user_' . $use
 
                 if(empty($active_related_posts)) {
                     $active_related_posts = array_filter($related_projects, function($post) use (&$has_past_projects) {
-                        if (PSI_Child_Theme::is_past_project($post)) {
+                        if (Utils::is_past_project($post)) {
                             return true;
                         } else {
                             return false;
                         }
                     });
                 }
+
+                usort($active_related_posts, function($a, $b) use ($user_id) {
+                    return Utils::sort_user_projects($a, $b, $user_id);
+                });
             
                 $initial_projects = array_slice($active_related_posts, 0, $posts_per_page);
                 
@@ -287,10 +290,6 @@ $related_projects = get_field('related_projects_and_initiatives', 'user_' . $use
                     // Return some error which says that there were no initial posts found  
                     //return false;
                 }
-
-                usort($initial_projects, function($a, $b) use ($user_id) {
-                    return PSI_Child_Theme::sort_user_projects($a, $b, $user_id);
-                });
 
                 // Check if there are additional posts beyond the initial posts
                 $has_more_posts = count($active_related_posts) > $posts_per_page;

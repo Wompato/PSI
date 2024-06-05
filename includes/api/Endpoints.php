@@ -23,13 +23,21 @@ class Endpoints {
             'methods'  => 'GET',
             'callback' => array(__CLASS__, 'get_projects'),
         ));
-        register_rest_route('psi/v1', '/active-user-projects/', array(
+        register_rest_route('psi/v1', '/active-projects/', array(
             'methods'  => 'GET',
             'callback' => array(__CLASS__, 'get_active_projects'),
         ));
-        register_rest_route('psi/v1', '/past-user-projects/', array(
+        register_rest_route('psi/v1', '/past-projects/', array(
             'methods'  => 'GET',
             'callback' => array(__CLASS__, 'get_past_projects'),
+        ));
+        register_rest_route('psi/v1', '/active-user-projects/', array(
+            'methods'  => 'GET',
+            'callback' => array(__CLASS__, 'get_active_user_projects'),
+        ));
+        register_rest_route('psi/v1', '/past-user-projects/', array(
+            'methods'  => 'GET',
+            'callback' => array(__CLASS__, 'get_past_user_projects'),
         ));
         register_rest_route('psi/v1', '/project/(?P<id>\d+)', array(
             'methods' => 'GET',
@@ -47,9 +55,195 @@ class Endpoints {
             'methods' => 'GET',
             'callback' => array(__CLASS__, 'get_users'),
         ));
+        register_rest_route('psi/v1', '/funding-programs/(?P<termId>\d+)', array(
+            'methods' => 'GET',
+            'callback' => array(__CLASS__, 'get_funding_programs'),
+        ));
     }
 
+    public static function get_funding_programs($request) {
+        // Check if termId parameter is provided in the request
+        $term_id = $request->get_param('termId');
+        $active = $request->get_param('active');
+
+        // If termId is provided, retrieve funding programs associated with the term
+        if ($term_id) {
+            $programs = get_field('related_programs', 'funding-agency_' . $term_id);
+            $filtered_programs = [];
+
+            if($active === 'true') {
+                $filtered_programs = \PSI\Utils::get_programs_with_active_projects($programs);
+            } else {
+                $filtered_programs = \PSI\Utils::get_programs_with_active_projects($programs, 'past');
+            }
+
+            $funding_programs = [];
+            
+            if ($filtered_programs && is_array($filtered_programs)) {
+                foreach($filtered_programs as $program_id) {
+                    $funding_programs[] = [
+                        'id'    => $program_id,
+                        'name'  => get_term_field('name', $program_id),
+                    ];
+                }
+            }
+
+            // Sort the funding programs alphabetically by 'name'
+            usort($funding_programs, function($a, $b) {
+                return strcmp($a['name'], $b['name']);
+            });
+
+            // Return the response
+            return rest_ensure_response($funding_programs);
+        } else {
+            // If no termId is provided, retrieve all funding program terms
+            $terms = get_terms(array(
+                'taxonomy' => 'funding_program', // Adjust this based on your taxonomy
+                'hide_empty' => false, // Include terms with no posts
+            ));
+    
+            // Prepare the response
+            $funding_programs = [];
+            foreach ($terms as $term) {
+                $funding_programs[] = array(
+                    'id'   => $term->term_id,
+                    'name' => $term->name,
+                );
+            }
+    
+            // Return the response
+            return rest_ensure_response($funding_programs);
+        }
+    }
+    
+
     public static function get_active_projects($request) {
+        $agency_id = $request->get_param('agency_id');
+        $program_id = $request->get_param('program_id');
+        $page = $request->get_param('page');
+        $posts_per_page = $request->get_param('amount'); 
+        $posts_to_skip = $request->get_param('skip');
+    
+        // Set up base args for WP_Query
+        $args = [
+            'post_type' => 'project',
+            'post_status' => 'publish',
+            'posts_per_page' => -1, // Fetch all to filter later
+            'tax_query' => []
+        ];
+    
+        // Add tax_query filters if agency_id or program_id is provided
+        if (!empty($agency_id)) {
+            $args['tax_query'][] = [
+                'taxonomy' => 'funding-agency',
+                'field' => 'term_id',
+                'terms' => $agency_id
+            ];
+        }
+    
+        if (!empty($program_id)) {
+            $args['tax_query'][] = [
+                'taxonomy' => 'funding-program',
+                'field' => 'term_id',
+                'terms' => $program_id
+            ];
+        }
+    
+        // Ensure multiple taxonomy queries work together
+        if (!empty($agency_id) && !empty($program_id)) {
+            $args['tax_query']['relation'] = 'AND';
+        }
+    
+        $query = new \WP_Query($args);
+        $all_projects = $query->posts;
+    
+        // Filter out past projects
+        $active_projects = array_filter($all_projects, function($post) {
+            return !\PSI\Utils::is_past_project($post);
+        });
+    
+        // Apply manual pagination
+        $start_index = ($page ?: 0) * $posts_per_page + $posts_to_skip;
+        $selected_projects = array_slice($active_projects, $start_index, $posts_per_page);
+    
+        $has_more = count($active_projects) > $start_index + $posts_per_page;
+    
+        ob_start();
+        foreach ($selected_projects as $post) {
+            get_template_part('template-parts/projects/activity-banner', '', ['post' => $post]);
+        }
+        $html = ob_get_clean();
+    
+        return rest_ensure_response([
+            'has_more' => $has_more,
+            'html' => $html,
+        ]);
+    }
+    
+    public static function get_past_projects($request) {
+        $agency_id = $request->get_param('agency_id');
+        $program_id = $request->get_param('program_id');
+        $page = $request->get_param('page');
+        $posts_per_page = $request->get_param('amount'); 
+        $posts_to_skip = $request->get_param('skip');
+    
+        // Set up base args for WP_Query
+        $args = [
+            'post_type' => 'project',
+            'post_status' => 'publish',
+            'posts_per_page' => -1, // Fetch all to filter later
+            'tax_query' => []
+        ];
+    
+        // Add tax_query filters if agency_id or program_id is provided
+        if (!empty($agency_id)) {
+            $args['tax_query'][] = [
+                'taxonomy' => 'funding-agency',
+                'field' => 'term_id',
+                'terms' => $agency_id
+            ];
+        }
+    
+        if (!empty($program_id)) {
+            $args['tax_query'][] = [
+                'taxonomy' => 'funding-program',
+                'field' => 'term_id',
+                'terms' => $program_id
+            ];
+        }
+    
+        // Ensure multiple taxonomy queries work together
+        if (!empty($agency_id) && !empty($program_id)) {
+            $args['tax_query']['relation'] = 'AND';
+        }
+    
+        $query = new \WP_Query($args);
+        $all_projects = $query->posts;
+    
+        // Filter out past projects
+        $active_projects = array_filter($all_projects, function($post) {
+            return \PSI\Utils::is_past_project($post);
+        });
+    
+        // Apply manual pagination
+        $start_index = ($page ?: 0) * $posts_per_page + $posts_to_skip;
+        $selected_projects = array_slice($active_projects, $start_index, $posts_per_page);
+    
+        $has_more = count($active_projects) > $start_index + $posts_per_page;
+    
+        ob_start();
+        foreach ($selected_projects as $post) {
+            get_template_part('template-parts/projects/activity-banner', '', ['post' => $post]);
+        }
+        $html = ob_get_clean();
+    
+        return rest_ensure_response([
+            'has_more' => $has_more,
+            'html' => $html,
+        ]);
+    }
+
+    public static function get_active_user_projects($request) {
         $user_id = $request->get_param('userID');
         $page = $request->get_param('page');
         $posts_per_page = $request->get_param('amount'); 
@@ -71,12 +265,12 @@ class Endpoints {
             return get_post_type($post) === 'project' && !Utils::is_past_project($post);
         });
 
-        $start_index = ($page ?: 0) * $posts_per_page + $posts_to_skip;
-        $posts = array_slice($active_related_posts, $start_index, $posts_per_page);
-
-        usort($posts, function($a, $b) use ($user_id) {
+        usort($active_related_posts, function($a, $b) use ($user_id) {
             return Utils::sort_user_projects($a, $b, $user_id);
         });
+
+        $start_index = ($page ?: 0) * $posts_per_page + $posts_to_skip;
+        $posts = array_slice($active_related_posts, $start_index, $posts_per_page);
 
         $has_more = count($active_related_posts) > $start_index + $posts_per_page;
 
@@ -99,7 +293,7 @@ class Endpoints {
         return rest_ensure_response($response);
     }
 
-    public static function get_past_projects($request) {
+    public static function get_past_user_projects($request) {
         $user_id = $request->get_param('userID');
         $page = $request->get_param('page');
         $posts_per_page = $request->get_param('amount'); 
@@ -119,18 +313,16 @@ class Endpoints {
 
         // Filter out active projects
         $past_related_posts = array_filter($related_posts, function($post) {
-            
-           
             return Utils::is_past_project($post) === true;
             
         });
 
-        $start_index = ($page ?: 0) * $posts_per_page + $posts_to_skip;
-        $posts = array_slice($past_related_posts, $start_index, $posts_per_page);
-
-        usort($posts, function($a, $b) use ($user_id) {
+        usort($past_related_posts, function($a, $b) use ($user_id) {
             return Utils::sort_user_projects($a, $b, $user_id);
         });
+
+        $start_index = ($page ?: 0) * $posts_per_page + $posts_to_skip;
+        $posts = array_slice($past_related_posts, $start_index, $posts_per_page);
 
         $has_more = count($past_related_posts) > $start_index + $posts_per_page;
 

@@ -150,8 +150,6 @@ function createCaptionEl(index) {
     return inputTextElement;
 }
 
-// Add this script to your WordPress admin area
-
 // Wait for the DOM to be ready
 document.addEventListener('DOMContentLoaded', function() {
 
@@ -169,12 +167,8 @@ document.addEventListener('DOMContentLoaded', function() {
            if (clipboardData) {
                // Retrieve HTML content from clipboard
                var pastedHTML = clipboardData.getData('text/html');
-               
-               // Process HTML content to remove unwanted tags or attributes if needed
-               // Here you can implement any custom processing you require
 
-               //pastedHTML = pastedHTML.replace(/<[^>]+>/g, ''); // Remove all HTML tags
-               pastedHTML = pastedHTML.replace(/<\/?p[^>]*>/g, '<div>'); // Replace <p> tags with <div> tags
+               pastedHTML = pastedHTML.replace(/<p[^>]*>/g, '').replace(/<\/p>/g, '<br>');
 
                
                // Insert the processed HTML content into the editor

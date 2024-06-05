@@ -28,10 +28,10 @@ class Utils {
         }
         
         // Convert end_date to DateTime object
-        $end_date = DateTime::createFromFormat('m/d/Y', $end_date);
+        $end_date = \DateTime::createFromFormat('m/d/Y', $end_date);
     
         // Get the current date
-        $current_date = new DateTime();
+        $current_date = new \DateTime();
     
         // Check if end_date is past the current date
         if ($end_date && $end_date < $current_date) {
@@ -51,33 +51,80 @@ class Utils {
      * @return int Sorting value.
      */
     public static function sort_user_projects($a, $b, $user_id) {
-        
-        $a_psi_lead = get_post_meta($a->ID, 'psi_lead', true);
-        $b_psi_lead = get_post_meta($b->ID, 'psi_lead', true);
+        // Retrieve the single user ID of the psi_lead for each project
+        $a_psi_lead_user = get_post_meta($a->ID, 'psi_lead', true);
+        $b_psi_lead_user = get_post_meta($b->ID, 'psi_lead', true);
 
-        $a_psi_lead_user = isset($a_psi_lead[0]) ? $a_psi_lead[0] : '';
-        $b_psi_lead_user = isset($b_psi_lead[0]) ? $b_psi_lead[0] : '';
-
+        // Retrieve the role of the psi_lead for each project
         $a_psi_lead_role = get_post_meta($a->ID, 'psi_lead_role', true);
         $b_psi_lead_role = get_post_meta($b->ID, 'psi_lead_role', true);
 
-        // Check if either $a or $b is the lead for the user and is a principal investigator
+        // Prioritize project where the user is the Principal Investigator
         if ($a_psi_lead_user == $user_id && $a_psi_lead_role == 'Principal Investigator') {
             return -1; // $a should come before $b
         } elseif ($b_psi_lead_user == $user_id && $b_psi_lead_role == 'Principal Investigator') {
             return 1; // $b should come before $a
         }
-    
-        // Check if either $a or $b is the lead for the user and is an Institutional PI
+
+        // Next, prioritize if the user is the Institutional PI
         if ($a_psi_lead_user == $user_id && $a_psi_lead_role == 'Institutional PI') {
             return -1; // $a should come before $b
         } elseif ($b_psi_lead_user == $user_id && $b_psi_lead_role == 'Institutional PI') {
             return 1; // $b should come before $a
         }
-    
+
+        // Next, prioritize if the user is the Science PI
+        if ($a_psi_lead_user == $user_id && $a_psi_lead_role == 'Science PI') {
+            return -1; // $a should come before $b
+        } elseif ($b_psi_lead_user == $user_id && $b_psi_lead_role == 'Science PI') {
+            return 1; // $b should come before $a
+        }
+
         // If none of the conditions match, maintain the current order
         return 0;
     }
 
+    public static function get_programs_with_active_projects($programs, $active = 'active') {
+        //error_log($active);
+        if($active === 'past') {
+            $date_comparison = '<';
+        } else {
+            $date_comparison = '>=';
+        }
+
+        
+        $programs_with_projects = array();
+
+        foreach ($programs as $program_id) {
+            // Check if the program has associated projects with end_date in the future
+            $projects_query = new \WP_Query(array(
+                'post_type' => 'project',
+                'tax_query' => array(
+                    array(
+                        'taxonomy' => 'funding-program',
+                        'field' => 'id',
+                        'terms' => $program_id
+                    )
+                ),
+                'meta_query' => array(
+                    array(
+                        'key' => 'end_date',
+                        'value' => date('Y-m-d'),
+                        'type' => 'DATE',
+                        'compare' => $date_comparison, // Check if end_date is greater than or equal to current date
+                    )
+                )
+            ));
+
+            if ($projects_query->have_posts()) {
+                $programs_with_projects[] = $program_id;
+            }
+            
+            // Reset Post Data
+            wp_reset_postdata();
+        }
+
+        return $programs_with_projects;
+    }
     
 }
