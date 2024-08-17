@@ -1,0 +1,26 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches:
+      - staging
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Sync files to staging server
+      uses: easingthemes/ssh-deploy@v2.1.5
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_MASTER }}
+        ARGS: "-rltgoDzvO --delete"
+        SOURCE: "./"
+        REMOTE_HOST: "68.66.226.89"
+        REMOTE_USER: "ssh_master"
+        TARGET: "/home/psiedu/staging.psi.edu/wp-content/themes/generatepress_child"
+        TIMEOUT: 300
+        PORT: "7822"

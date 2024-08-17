@@ -1149,6 +1149,10 @@ img.table-profile-picture {
   opacity: 0.65;
 }
 
+.featured-image-wrapper img {
+  border-radius: 5px;
+}
+
 /* Load more posts via AJAX on Press Releases and Cover Stories pages */
 #load-more-posts-container {
   display: grid;
