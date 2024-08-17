@@ -16,10 +16,10 @@ jobs:
     - name: Sync files to staging server
       uses: easingthemes/ssh-deploy@v2.1.5
       env:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_MASTER }}
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_DEPLOYMENT }}
       with:
         args: "-rltgoDzvO --delete --rsh='ssh -p 7822 -o StrictHostKeyChecking=no'"
         source: "./"
         remote_host: "68.66.226.89"
-        remote_user: "ssh_master"
+        remote_user: "ssh_deployment"
         target: "/home/psiedu/staging.psi.edu/wp-content/themes/generatepress_child"
