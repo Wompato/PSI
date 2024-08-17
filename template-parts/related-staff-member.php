@@ -2,8 +2,23 @@
 
 $staff_member = $args['staff-member'];
 
-if ($staff_member) {
-    $staff_member_data = $staff_member->data;
+// Normalize input: Convert array to object if needed
+if (is_array($staff_member)) {
+    $staff_member = (object) $staff_member;
+}
+
+// Initialize $staff_member_data as an object
+$staff_member_data = new stdClass();
+
+// Check if $staff_member already has a 'data' property and it's an object
+if (isset($staff_member->data) && is_object($staff_member->data)) {
+    $staff_member_data = $staff_member->data; // Use it directly if it exists
+} else {
+    // Set up the nested data structure if 'data' property doesn't exist
+    if (isset($staff_member->ID) && isset($staff_member->display_name)) {
+        $staff_member_data->ID = $staff_member->ID;
+        $staff_member_data->display_name = $staff_member->display_name;
+    }
 }
 
 $user_slug = get_field('user_slug', 'user_' . $staff_member_data->ID);
@@ -27,6 +42,7 @@ if ($profile_images) {
         }
     }
 }
+
 
 if (empty($profile_img_url)) {
     $default_image = get_field('default_user_picture', 'option');

@@ -1,11 +1,13 @@
 jQuery(document).ready(function($) {
     const projectListTitle = $('.past-projects h4');
 
+    const programList = $('.program-list');
+    const projectList = $('.project-list');
+
     $('.agency-list').on('click', '.funding-agency-link', function(e) {
         e.preventDefault();
         if(e.target.dataset.termId) {
             const termId = e.target.dataset.termId;
-            const programList = $('.program-list');
 
             $('.funding-agency-link').removeClass('current');
             
@@ -13,6 +15,8 @@ jQuery(document).ready(function($) {
             $(this).addClass('current');
 
             programList.empty();
+            projectList.empty();
+            projectListTitle.text('');
 
             if (jQuery('.loading-dual-ring').length === 0) {
                 jQuery('.archive-programs').append('<div class="loading-dual-ring"></div>');
@@ -45,7 +49,6 @@ jQuery(document).ready(function($) {
         if(e.target.dataset.programId) {
             const termId = e.target.dataset.programId;
             const termName = e.target.textContent;
-            const projectList = $('.project-list');
 
             $('.funding-program-link').removeClass('current');
             

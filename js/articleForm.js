@@ -149,35 +149,3 @@ function createCaptionEl(index) {
 
     return inputTextElement;
 }
-
-// Wait for the DOM to be ready
-document.addEventListener('DOMContentLoaded', function() {
-
-    // Wait for TinyMCE to be initialized
-    tinymce.on('addeditor', function(event) {
-        var editor = event.editor;
-
-        
-
-        // Register paste event listener
-        editor.on('paste', function(e) {
-           e.preventDefault();
-           // Get the clipboard data
-           var clipboardData = (e.originalEvent || e).clipboardData || window.clipboardData;
-           if (clipboardData) {
-               // Retrieve HTML content from clipboard
-               var pastedHTML = clipboardData.getData('text/html');
-
-               pastedHTML = pastedHTML.replace(/<p[^>]*>/g, '').replace(/<\/p>/g, '<br>');
-
-               
-               // Insert the processed HTML content into the editor
-               editor.setContent(pastedHTML);
-           }
-        });
-
-        
-    });
-});
-
-

@@ -1,12 +1,14 @@
 jQuery(document).ready(function($) {
     const projectListTitle = $('.active-projects h4');
 
+    const programList = $('.program-list');
+    const projectList = $('.project-list');
+
     $('.agency-list').on('click', '.funding-agency-link', function(e) {
         e.preventDefault();
         if(e.target.dataset.termId) {
             const termId = e.target.dataset.termId;
-            const programList = $('.program-list');
-
+            
            // Remove 'current' class from all links
             $('.funding-agency-link').removeClass('current');
             
@@ -14,14 +16,15 @@ jQuery(document).ready(function($) {
             $(this).addClass('current');
 
             programList.empty();
+            projectList.empty();
+            projectListTitle.text('');
 
             if (jQuery('.loading-dual-ring').length === 0) {
                 jQuery('.archive-programs').append('<div class="loading-dual-ring"></div>');
             }
 
-            // Make a GET request to the endpoint
             $.ajax({
-                url: '/wp-json/psi/v1/funding-programs/' + termId, // Adjust the URL based on your WordPress setup
+                url: '/wp-json/psi/v1/funding-programs/' + termId,
                 method: 'GET',
                 data: { active: true },
                 success: function(response) {
@@ -38,7 +41,7 @@ jQuery(document).ready(function($) {
                 }
             });
         }
-        // Perform additional actions here if needed
+        
     });
 
     $('.program-list').on('click', '.funding-program-link', function(e) {
@@ -46,7 +49,7 @@ jQuery(document).ready(function($) {
         if(e.target.dataset.programId) {
             const termId = e.target.dataset.programId;
             const termName = e.target.textContent;
-            const projectList = $('.project-list');
+            
 
             $('.funding-program-link').removeClass('current');
             
@@ -61,9 +64,8 @@ jQuery(document).ready(function($) {
                 jQuery('.project-list').append('<div class="loading-dual-ring"></div>');
             }
 
-            // Make a GET request to the endpoint
             $.ajax({
-                url: '/wp-json/psi/v1/active-projects/', // Adjust the URL based on your WordPress setup
+                url: '/wp-json/psi/v1/active-projects/',
                 method: 'GET',
                 data: { program_id: termId },
                 success: function(response) {
@@ -78,7 +80,7 @@ jQuery(document).ready(function($) {
                 }
             });
         }
-        // Perform additional actions here if needed
+        
     });
 });
 

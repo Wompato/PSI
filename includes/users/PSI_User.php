@@ -13,6 +13,7 @@ class PSI_User {
         add_filter('ajax_query_attachments_args', array($this, 'modify_attachments_query'));
         // Redirect non admin users from the backend of the site
         add_filter('login_redirect', array($this, 'redirect_non_admin_users'), 10, 3);
+        add_action('admin_init', array($this, 'restrict_non_admin_access'));
         // Hide admin bar for staff members and staff member editors
         add_action('init', array($this, 'hide_admin_bar_for_staff'));
     }
@@ -71,7 +72,9 @@ class PSI_User {
         }
 
         // Check if the user has the 'staff_member' role
-        return $user && in_array('staff_member', (array) $user->roles);
+        $is_staff_member = $user && in_array('staff_member', (array) $user->roles);
+        
+        return $is_staff_member;
     }
 
     /**
@@ -90,7 +93,9 @@ class PSI_User {
         }
 
         // Check if the user has the 'staff_member_editor' role
-        return $user && in_array('staff_member_editor', (array) $user->roles);
+        $is_staff_member_editor = $user && in_array('staff_member_editor', (array) $user->roles);
+
+        return $is_staff_member_editor;
     }
 
     /**
@@ -131,12 +136,31 @@ class PSI_User {
      * @return string The modified redirect URL.
      */
     public function redirect_non_admin_users($redirect_to, $request, $user) {
+        
         if(self::is_staff_member() || self::is_staff_member_editor()) {
-            return home_url();
+            
+            //return home_url();
         }
         return $redirect_to;
     }
 
+    /**
+     * Redirect non-admin users away from the WordPress admin area.
+     */
+    public function restrict_non_admin_access() {
+
+        if (defined('DOING_AJAX') && DOING_AJAX) {
+            return; // Allow AJAX requests
+        }
+
+        $current_user = wp_get_current_user();
+
+        if (self::is_staff_member($current_user) || self::is_staff_member_editor($current_user)) {
+            wp_redirect(home_url());
+            exit;
+        }
+
+    }
 
     public static function generate_unique_user_slug($first_name, $last_name, $user_id = null) {
         $base_slug = sanitize_title($first_name . '-' . $last_name); // Create a basic slug
@@ -174,5 +198,23 @@ class PSI_User {
         return true;
     }
     
+    public static function get_user_profile_url($user_id) {
+        // Ensure that the user ID is provided and is a valid number.
+        if (empty($user_id) || !is_numeric($user_id)) {
+            return false; // Return false if the user ID is not valid.
+        }
     
+        // Get the user slug from user meta.
+        $user_slug = get_user_meta($user_id, 'user_slug', true);
+        
+        // Check if the user slug exists.
+        if (empty($user_slug)) {
+            return false; // Return false if the user slug is not set or empty.
+        }
+    
+        // Construct the profile URL based on the local development environment.
+        $profile_url = home_url("/staff/profile/{$user_slug}/");
+    
+        return $profile_url;
+    }
 }

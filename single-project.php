@@ -1,5 +1,26 @@
 <?php get_header(); 
 
+use \PSI\Utils;
+
+function format_non_psi_personnel($name, $role, $institution, $index, $total) {
+  if (empty($name)) {
+      return '';
+  }
+
+  $formatted = $name;
+
+  $details = array_filter([$role, $institution]);
+  if (!empty($details)) {
+      $formatted .= ' (' . implode(', ', $details) . ')';
+  }
+
+  if ($index < $total - 1) {
+      $formatted .= ', ';
+  }
+
+  return $formatted;
+}
+
 
 $content = wpautop(get_the_content());
 $count = str_word_count($content);
@@ -8,109 +29,60 @@ $title = get_the_title();
 $post_id = get_the_ID();
 
 $psi_lead_data = get_field('psi_lead');
-
-$psi_lead_id = $psi_lead_data ? $psi_lead_data[0]->ID : '';
 $psi_lead_role = get_field('psi_lead_role');
+
+$psi_lead_id = $psi_lead_name = '';
+
+/* For some historical reasons some psi lead data will come back as either an array or an object (might need to manually update all WP users) */
+if ($psi_lead_data) {
+  $psi_lead = is_array($psi_lead_data) ? $psi_lead_data[0] : $psi_lead_data;
+  $psi_lead_id = $psi_lead->ID ?? '';
+  $psi_lead_name = $psi_lead->display_name ?? '';
+}
 
 $pi_slug = get_field('user_slug', 'user_' . $psi_lead_id);
 
 $psi_lead_image_data = get_field('profile_pictures', 'user_' . $psi_lead_id);
+$default_image = get_field('default_user_picture', 'option');
 
-if($psi_lead_image_data && isset($psi_lead_image_data['primary_picture']) && $psi_lead_image_data['primary_picture'] == true){
-  $profile_image_url = $psi_lead_image_data['primary_picture']["url"];
-  $profile_image_alt = $psi_lead_image_data['primary_picture']["alt"]; 
-} else {
-  $default_image = get_field('default_user_picture', 'option');
-  $profile_image_url = $default_image['url'];
-  $profile_image_alt = $default_image['alt'];
+$profile_image_url = $default_image['url'] ?? '';
+$profile_image_alt = $default_image['alt'] ?? '';
+
+if ($psi_lead_image_data && $psi_lead_image_data['primary_picture'] ?? false) {
+    $profile_image_url = $psi_lead_image_data['primary_picture']["url"] ?? $profile_image_url;
+    $profile_image_alt = $psi_lead_image_data['primary_picture']["alt"] ?? $profile_image_alt;
 }
 
-$co_primary_investigator_data = get_field('co_principal_investigator') ?: [];
-$co_investigators_data = get_field('co-investigators') ?: [];
-$collaborators_data = get_field('collaborators') ?: [];
-$supporters_data = get_field('support') ?: [];
-$science_pi_data = get_field('science_pi') ?: [];
-$post_doc_data = get_field('postdoctoral_associate') ?: [];
-$graduate_data = get_field('graduate_student') ?: [];
-
-$psi_team = array_merge(
-  $co_primary_investigator_data,
-  $co_investigators_data,
-  $collaborators_data,
-  $supporters_data,
-  $science_pi_data,
-  $post_doc_data,
-  $graduate_data
-);
+$psi_team = Utils::get_project_users($post_id);
 
 $non_psi_personel_data = get_field('non-psi_personnel');
-$science_pi = '';
-$science_pi_institute = '';
-$pi = ''; 
-$pi_institute = '';
-$non_psi_personel = '';
+$science_pi = $science_pi_institute = $pi = $pi_institute = $non_psi_personel = '';
 
 if ($unserialized_data = unserialize($non_psi_personel_data)) {
-  $total_personel = count($unserialized_data);
-
   foreach ($unserialized_data as $i => $personel) {
-      $name = isset($personel['Name']) ? $personel['Name'] : '';
-      $role = isset($personel['Role']) ? $personel['Role'] : '';
-      $institution = isset($personel['Institution']) ? $personel['Institution'] : '';
+      $name = $personel['Name'] ?? '';
+      $role = $personel['Role'] ?? '';
+      $institution = $personel['Institution'] ?? '';
 
-      // Check if role is "Science PI" or "PI"
-      if ($role === "Science PI" || $role === "Principal Investigator") {
-          // Assign name and institution accordingly
-          if ($role === "Science PI") {
-              $science_pi = $name;
-              $science_pi_institute = $institution;
-          } else {
-              $pi = $name;
-              $pi_institute = $institution;
-          }
-      } else {
-          // Check if name is not empty
-          if (!empty($name)) {
-              // Add name
-              $non_psi_personel .= $name;
-
-              // Check if role or institution is present
-              if (!empty($role) || !empty($institution)) {
-                  // Add opening parenthesis
-                  $non_psi_personel .= ' (';
-
-                  // Add role if it exists
-                  if (!empty($role)) {
-                      $non_psi_personel .= $role;
-
-                      // Check if institution is also present before adding comma
-                      if (!empty($institution)) {
-                          $non_psi_personel .= ', ';
-                      }
-                  }
-
-                  // Add institution if it exists
-                  if (!empty($institution)) {
-                      $non_psi_personel .= $institution;
-                  }
-
-                  // Add closing parenthesis
-                  $non_psi_personel .= ')';
-              }
-
-              // Add comma if it's not the last iteration
-              if ($i < $total_personel - 1) {
-                  $non_psi_personel .= ', ';
-              }
-          }
+      if ($role === "Science PI") {
+          $science_pi = $name;
+          $science_pi_institute = $institution;
+          continue;
       }
+
+      if ($role === "Principal Investigator") {
+          $pi = $name;
+          $pi_institute = $institution;
+          continue;
+      }
+
+      $non_psi_personel .= format_non_psi_personnel($name, $role, $institution, $i, count($unserialized_data));
   }
 }
 
 // Get Program (category) for this project
 $programs = get_the_terms($post_id, 'funding-program');
 
-// Check if there are any programs assigned
 if ($programs) {
     // Get the first program
     $first_program = $programs[0];
@@ -126,7 +98,7 @@ if ($programs) {
 }
 
 $funding_sources = get_the_terms($post_id, 'funding-agency');
-// Check if there are any funding sources assigned
+
 if ($funding_sources) {
     // Get the first funding source
     $first_funding_source = $funding_sources[0];
@@ -168,7 +140,7 @@ $current_user = wp_get_current_user();
         <div class="pi-container">
           <a href="<?php echo home_url('/staff/profile/' . $pi_slug); ?>">
             <img src="<?php echo $profile_image_url;?>" alt="<?php echo $profile_image_alt;?>">
-            <p><?php echo $psi_lead_data[0]->display_name;?></p>
+            <p><?php echo $psi_lead_name; ?></p>
             <span>
               <?php echo isset($psi_lead_role) ? $psi_lead_role : 'Principal Investigator'; ?>
             </span>
@@ -241,9 +213,9 @@ $current_user = wp_get_current_user();
           <h3>PSI Personnel</h3>
           <div class="coi-collab-track related-staff-carousel-large">
             <?php
-            foreach($psi_team as $coi_collab){
+            foreach($psi_team as $user){
               get_template_part('template-parts/related-staff-member', '', array(
-                'staff-member' => $coi_collab
+                'staff-member' => $user
               ));
             }
             ?>

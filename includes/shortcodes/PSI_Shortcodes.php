@@ -73,21 +73,23 @@ class PSI_Shortcodes {
 
                 if($profile_images){
                     $profile_img = $profile_images['icon_picture'] ? $profile_images['icon_picture'] : null;
+
                     if($profile_img){
-                        $profile_img_url = $profile_img['url'];
+                        $profile_img_url = $profile_img["sizes"]['thumbnail'];
                         $profile_img_alt = $profile_img['alt'];
                     } else {
                         $profile_img = $profile_images["primary_picture"] ? $profile_images["primary_picture"] : null;
                         if($profile_img){
-                            $profile_img_url = $profile_img['url'];
+                            $profile_img_url = $profile_img["sizes"]['thumbnail'];
                             $profile_img_alt = $profile_img['alt'];
                         }
+                        
                     }     
                 } 
 
                 if(!$profile_img) {
                     $default_image = get_field('default_user_picture', 'option');
-                    $profile_img_url = $default_image['url'];
+                    $profile_img_url = $default_image["sizes"]['thumbnail'];
                     $profile_img_alt = $default_image['alt'];
                 }
     

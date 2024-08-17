@@ -2,13 +2,14 @@
 
 namespace PSI\Forms\Managers;
 
+use PSI\Utils;
 use PSI\Forms\FormHanlder;
 use PSI\Forms\GWiz\GPASVS_Enable_Add_New_Option;
 
 class ProjectManager {
 
     private static $roles = [
-        "psi_lead"                  => 'field_66281ae0732f4',
+        "Psi Lead"                  => 'field_66281ae0732f4',
         "Co-Principal Investigator" => 'field_66281b47732f6',
         "Co-Investigator"           => 'field_656539a3fe4ba',
         "Science PI"                => 'field_664291adf52eb',
@@ -24,8 +25,8 @@ class ProjectManager {
         add_action('gform_after_submission_10', array($this, 'create_project'), 10, 2);
         add_action('gform_after_submission_8', array($this, 'update_project'), 10, 2);
 
-        add_filter('gform_column_input_10_14_2', array($this, 'customize_role_type'));
-        add_filter('gform_column_input_8_12_2', array($this, 'customize_role_type'));
+        //add_filter('gform_column_input_10_14_2', array($this, 'customize_role_type'));
+        //add_filter('gform_column_input_8_12_2', array($this, 'customize_role_type'));
 
         add_filter('gppa_query_limit_10_22', array($this, 'set_query_limit'), 10, 2);
 
@@ -116,63 +117,9 @@ class ProjectManager {
             set_post_thumbnail( $post_id, $attachment_id );
         }
 
-        $decodedData = json_decode(stripslashes($_POST["other-psi-personnel"]));
-        $decoded_og_team = json_decode(stripcslashes($_POST["other-psi-personnel-ogteam"]));
-        $decoded_og_team[] = $psi_lead;
+        $psi_team = json_decode(stripslashes($_POST["other-psi-personnel"]));
 
-        $coPrincipalInvestigators = [];
-        $coInvestigators = [];
-        $supports = [];
-        $collaborators = [];
-        $postdoc_associates = [];
-        $grad_students = [];
-        $science_pi = [];
-
-        foreach ($decodedData as $item) {
-            // Ignore items where name is empty
-            
-            if (!empty($item->name)) {
-                // Based on the role, store names in respective arrays
-                switch ($item->role) {
-                    case "Co-Principal Investigator":
-                        $coPrincipalInvestigators[] = $item->name;
-                        
-                        break;
-                    case "Co-Investigator":
-                        $coInvestigators[] = $item->name;
-                     
-                        break;
-                    case "Support":
-                        $supports[] = $item->name;
-                        
-                        break;
-                    case "Collaborator":
-                        $collaborators[] = $item->name;
-                        
-                        break;
-                    case "Postdoctoral Associate":
-                        $postdoc_associates[] = $item->name;
-                    
-                        break;
-                    case "Graduate Student":
-                        $grad_students[] = $item->name;
-                      
-                        break;
-                    case "Science PI":
-                        $science_pi[] = $item->name;
-                       
-                        break;
-                    // Add more cases for other roles if needed
-                }
-                
-            }
-        }
-
-        $post_data = array(
-            'ID'           => $post_id,
-            'post_content' => $content,
-            'post_title'   => $title,
-        );
+        Utils::update_project_users( $post_id , $psi_team);
 
         update_field('field_65652d6d24359', $nickname, $post_id);
         update_field('field_65652c058b351', $project_number, $post_id);
@@ -181,69 +128,10 @@ class ProjectManager {
         update_field('field_65652f552435d', $end_date, $post_id);
         update_field('field_65652f772435e', $project_website, $post_id);
         update_field('field_656541b47d94c', $non_psi_personel, $post_id);
-        update_field('field_66281e08a4ce4', $passthrough_entity, $post_id);
         update_field('field_65652c908b353', $funding_instrument, $post_id);
-        update_field('field_66281b47732f6', $coPrincipalInvestigators, $post_id);
-        update_field('field_656539a3fe4ba', $coInvestigators, $post_id);
-        update_field('field_656541567d94b', $collaborators, $post_id);
-        update_field('field_66281b66732f7', $supports, $post_id);
-        update_field('field_66424f3422202', $postdoc_associates, $post_id);
-        update_field('field_6642500d22203', $grad_students, $post_id);
-        update_field('field_664291adf52eb', $science_pi, $post_id);
         update_field('field_66281b08732f5', $psi_lead_role, $post_id);
         update_field('field_66281ae0732f4', $psi_lead, $post_id);
-
-        // Merge all user arrays into one
-        $all_users = array_merge(
-            $coPrincipalInvestigators,
-            $coInvestigators,
-            $supports,
-            $collaborators,
-            $postdoc_associates,
-            $grad_students,
-            $science_pi,
-        );
-
-        $all_users[] = $psi_lead;
-
-        // Remove any empty or duplicate user IDs
-        $all_users = array_filter(array_unique($all_users));
-        // Compare old team members with new PSI team members
-        $left_out_users = array_diff($decoded_og_team, $all_users);
-
-        // Loop over left out users and remove the project from their related projects
-        foreach ($left_out_users as $user_id) {
-            // Retrieve related projects field for the user
-            $related_projects = get_user_meta($user_id, 'related_projects_and_initiatives', true);
-
-            // Convert empty string to empty array
-            if (empty($related_projects)) {
-                $related_projects = [];
-            }
-
-            // Remove project from related projects field
-            $updated_related_projects = array_diff($related_projects, array($post_id));
-            update_user_meta($user_id, 'related_projects_and_initiatives', $updated_related_projects);
-        }
-
-        // Loop over all users and update related projects
-        foreach ($all_users as $user_id) {
-            // Retrieve related projects, handling the case where it might be an empty string
-            $related_projects = get_user_meta($user_id, 'related_projects_and_initiatives', true);
         
-            // Convert empty string to empty array
-            if (empty($related_projects)) {
-                $related_projects = [];
-            }
-        
-            // Add current project if not already present
-            if (!in_array($project_id, $related_projects)) {
-                $related_projects[] = $project_id;
-                update_user_meta($user_id, 'related_projects_and_initiatives', $related_projects);
-            }
-        } 
-        
-
         $taxonomies = array(
             'funding-agency'   => $funding_source,
             'funding-program'  => $funding_program,
@@ -286,7 +174,6 @@ class ProjectManager {
         
         $content = str_replace(['“','”'], '', rgar($entry, '3'));
 
-     
         $title = rgar($entry, '2'); 
         $featured_image = json_decode(rgar($entry, '21'));
         $featured_image_preview = rgpost( 'featured-image-id' );
@@ -309,58 +196,9 @@ class ProjectManager {
         $psi_lead = rgar($entry, '15');
         $psi_lead_role = rgar($entry, '27');
        
-        
-        $decodedData = json_decode(stripslashes($_POST["other-psi-personnel"]));
-        $decoded_og_team = json_decode(stripcslashes($_POST["other-psi-personnel-ogteam"]));
-        $decoded_og_team[] = $psi_lead;
+        $psi_team = json_decode(stripslashes($_POST["other-psi-personnel"]));
 
-        $coPrincipalInvestigators = [];
-        $coInvestigators = [];
-        $supports = [];
-        $collaborators = [];
-        $postdoc_associates = [];
-        $grad_students = [];
-        $science_pi = [];
-
-        foreach ($decodedData as $item) {
-            // Ignore items where name is empty
-            
-            if (!empty($item->name)) {
-                // Based on the role, store names in respective arrays
-                switch ($item->role) {
-                    case "Co-Principal Investigator":
-                        $coPrincipalInvestigators[] = $item->name;
-                        
-                        break;
-                    case "Co-Investigator":
-                        $coInvestigators[] = $item->name;
-                     
-                        break;
-                    case "Support":
-                        $supports[] = $item->name;
-                        
-                        break;
-                    case "Collaborator":
-                        $collaborators[] = $item->name;
-                        
-                        break;
-                    case "Postdoctoral Associate":
-                        $postdoc_associates[] = $item->name;
-                    
-                        break;
-                    case "Graduate Student":
-                        $grad_students[] = $item->name;
-                      
-                        break;
-                    case "Science PI":
-                        $science_pi[] = $item->name;
-                       
-                        break;
-                    // Add more cases for other roles if needed
-                }
-                
-            }
-        }
+        Utils::update_project_users( $post_id , $psi_team);
 
         $post_data = array(
             'ID'           => $post_id,
@@ -377,65 +215,8 @@ class ProjectManager {
         update_field('field_656541b47d94c', $non_psi_personel, $post_id);
         update_field('field_66281e08a4ce4', $passthrough_entity, $post_id);
         update_field('field_65652c908b353', $funding_instrument, $post_id);
-        update_field('field_66281b47732f6', $coPrincipalInvestigators, $post_id);
-        update_field('field_656539a3fe4ba', $coInvestigators, $post_id);
-        update_field('field_656541567d94b', $collaborators, $post_id);
-        update_field('field_66281b66732f7', $supports, $post_id);
-        update_field('field_66424f3422202', $postdoc_associates, $post_id);
-        update_field('field_6642500d22203', $grad_students, $post_id);
-        update_field('field_664291adf52eb', $science_pi, $post_id);
         update_field('field_66281b08732f5', $psi_lead_role, $post_id);
         update_field('field_66281ae0732f4', $psi_lead, $post_id);
-
-        // Merge all user arrays into one
-        $all_users = array_merge(
-            $coPrincipalInvestigators,
-            $coInvestigators,
-            $supports,
-            $collaborators,
-            $postdoc_associates,
-            $grad_students,
-            $science_pi,
-        );
-
-        $all_users[] = $psi_lead;
-
-        // Remove any empty or duplicate user IDs
-        $all_users = array_filter(array_unique($all_users));
-        // Compare old team members with new PSI team members
-        $left_out_users = array_diff($decoded_og_team, $all_users);
-
-        // Loop over left out users and remove the project from their related projects
-        foreach ($left_out_users as $user_id) {
-            // Retrieve related projects field for the user
-            $related_projects = get_user_meta($user_id, 'related_projects_and_initiatives', true);
-
-            // Convert empty string to empty array
-            if (empty($related_projects)) {
-                $related_projects = [];
-            }
-
-            // Remove project from related projects field
-            $updated_related_projects = array_diff($related_projects, array($post_id));
-            update_user_meta($user_id, 'related_projects_and_initiatives', $updated_related_projects);
-        }
-
-        // Loop over all users and update related projects
-        foreach ($all_users as $user_id) {
-            // Retrieve related projects, handling the case where it might be an empty string
-            $related_projects = get_user_meta($user_id, 'related_projects_and_initiatives', true);
-        
-            // Convert empty string to empty array
-            if (empty($related_projects)) {
-                $related_projects = [];
-            }
-        
-            // Add current project if not already present
-            if (!in_array($post_id, $related_projects)) {
-                $related_projects[] = $post_id;
-                update_user_meta($user_id, 'related_projects_and_initiatives', $related_projects);
-            }
-        } 
 
         if( rgempty( $featured_image ) && $featured_image_preview ) {
             // do nothing

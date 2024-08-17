@@ -1,0 +1,75 @@
+$breakpoint-small: 600px;
+$breakpoint-medium: 992px;
+
+$gap: 20px;
+
+.page-template-find-an-expert-template {
+    .site-content {
+        flex-direction: column;
+        margin-top: 80px;
+        max-width: 1250px;
+        margin-left: 40px;
+        margin-right: 40px;
+    }
+
+    #expert-search-form {
+        display: flex;
+        flex-direction: column;
+        flex-wrap: wrap;
+        row-gap: $gap;
+        align-items: center;
+        margin-bottom: 50px;
+        width: 100%;
+
+        .logics {
+            margin-right: 30px;
+
+            @media (max-width: $breakpoint-small) {
+                margin-right: 0px;
+            }
+        }
+    }
+
+    #filters {
+        display: flex;
+        align-items: center;
+
+        @media (max-width: $breakpoint-small) {
+            flex-direction: column;
+            row-gap: $gap;
+        }
+    }
+    
+    #search-text {
+        width: 100%;
+    }
+
+    button,
+    input {
+        border-radius: 5px;
+    }
+
+    #search-results {
+        display: grid;
+        column-gap: 1em;
+        row-gap: 0.5em;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Default to responsive columns */
+    
+        p {
+            margin: 0;
+        }
+
+        @media (min-width: $breakpoint-small) {
+            grid-template-columns: repeat(3, 1fr); // Max 3 columns
+        }
+      
+        @media (max-width: $breakpoint-medium) {
+            grid-template-columns: repeat(2, 1fr); // Two columns on medium screens
+        }
+      
+        @media (max-width: $breakpoint-small) {
+            grid-template-columns: 1fr; // One column on small screens
+        }
+
+    }
+}

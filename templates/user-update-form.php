@@ -54,22 +54,20 @@ function my_acf_admin_footer($current_user) {
 
     
 
-    if ( ! current_user_can( 'manage_options' ) /* && ! in_array( 'editor', (array) $current_user->roles ) */ ) { ?>
+    if ( ! current_user_can( 'manage_options' ) ) { ?>
     <script type="text/javascript">
 
     
 
         (function($) {
             
-            // Find all elements with class acf-gallery-add and change the text
             $('.acf-gallery-add').text('Add Image');
             
         })(jQuery);	
         (function($) {
         $(document).ready(function() {
-            var maxCharacters = 50; // Set your desired character limit
+            var maxCharacters = 50;
 
-            // Replace 'your_wysiwyg_field' with the actual name of your ACF WYSIWYG field
             var wysiwygField = document.querySelector('#mceu_76');
             console.log(wysiwygField);
 
@@ -89,16 +87,13 @@ function my_acf_admin_footer($current_user) {
 
                     function hideMediaModalElements() {
                         if ($('.media-modal').length) {
-                            // Your custom JavaScript for the media modal
                             $('.media-modal').find('[data-setting="caption"]').hide();
                             $('.media-modal').find('[data-setting="description"]').hide();
                         }
                     }
 
-                    // Function to hide elements inside .acf-gallery-side
                     function hideAcfGallerySideElements() {
                         if ($('.acf-gallery-side').length) {
-                            // Your custom JavaScript for .acf-gallery-side
                             $('.acf-gallery-side').find('[data-name="caption"]').hide();
                             $('.acf-gallery-side').find('[data-name="description"]').hide();
                             $('.acf-gallery-side').find('.acf-gallery-edit').hide();
@@ -122,18 +117,14 @@ function my_acf_admin_footer($current_user) {
                         }
                     }
 
-                    // Initial call to hide elements
                     hideMediaModalElements();
                     hideAcfGallerySideElements();
                     hideCompactAttFields();
                     hideAttDetails();
 
-                    // Use Mutation Observer to detect changes in the DOM
                     var observer = new MutationObserver(function (mutations) {
                         mutations.forEach(function (mutation) {
-                            // Check if nodes are added or removed
                             if (mutation.addedNodes.length || mutation.removedNodes.length) {
-                                // Call the functions to hide elements whenever there is a change
                                 hideMediaModalElements();
                                 hideAcfGallerySideElements();
                                 hideCompactAttFields();
@@ -142,11 +133,9 @@ function my_acf_admin_footer($current_user) {
                         });
                     });
 
-                    // Specify the target node and options for the observer
-                    var targetNode = document.body; // You can change this to a more specific container if needed
+                    var targetNode = document.body;
                     var config = { childList: true, subtree: true };
 
-                    // Start observing the target node for mutations
                     observer.observe(targetNode, config);
         });
         })(jQuery);
@@ -160,7 +149,8 @@ function my_acf_admin_footer($current_user) {
  $form_settings = array(
      'post_id' => 'user_' . $user_id, // User ID as post ID for ACF fields
      'new_post' => false,
-     'fields' => ['profile_pictures', 'cv', 'publications_file', 'professional_interests_professional_interests_text', 'professional_interests_professional_interests_images',
+     'fields' => ['profile_pictures', 'cv', 'publications_file', 'professional_interests_professional_interests_text', 
+     'professional_interests_professional_interests_images',
      'professional_interests_professional_interests_image_caption', 'professional_history_professional_history_text', 'professional_history_professional_history_images',
      'professional_history_professional_history_image_caption', 'honors_and_awards_honors_and_awards_text', 'honors_and_awards_honors_and_awards_images', 'honors_and_awards_honors_and_awards_image_caption',
      'personal_page', 'display_in_directory', 'targets_of_interests', 'disciplines_techniques', 'missions', 'mission_roles', 'instruments', 'facilities', 'Accordion', 'twitter_x', 'linkedin', 'facebook', 'youtube', 'instagram', 'github', 'orchid', 'google_scholar'], // Include all field groups assigned to the user
@@ -180,80 +170,6 @@ function my_acf_admin_footer($current_user) {
     
     <button type="submit">Update Profile</button>
  </form>
- <div class="image-uploader">
-    <div>
-        <label for="primary-image">Primary Image</label>
-        <div>
-            <input name="primary-image" type="hidden">
-            <div class="show-if-value">
-                <img class="upload-preview" src="" alt="">
-                <div class="acf-actions -hover">
-                    <a class="acf-icon -pencil dark custom-edit-metadata" data-name="edit" href="#" title="Edit"></a>
-                    <a class="acf-icon -cancel dark custom-remove-image" data-name="remove" href="#" title="Remove"></a>
-                </div>
-            </div>
-            <div class="hide-if-value">
-		        <p>No image selected <button data-name="add" class="image-uploader-btn" href="#">Add Image</button></p>
-	        </div>
-        </div>
-    </div>
- </div>
- <div class="image-uploader">
-    <div>
-        <label for="professional-history-image">Professional History Image</label>
-        <div>
-            <input name="professional-history-image" type="hidden">
-            <div class="show-if-value">
-                <img class="upload-preview" src="" alt="">
-                <div class="acf-actions -hover">
-                    <a class="acf-icon -pencil dark custom-edit-metadata" data-name="edit" href="#" title="Edit"></a>
-                    <a class="acf-icon -cancel dark custom-remove-image" data-name="remove" href="#" title="Remove"></a>
-                </div>
-            </div>
-            <div class="hide-if-value">
-		        <p>No image selected <button data-name="add" class="image-uploader-btn" href="#">Add Image</button></p>
-	        </div>
-        </div>
-    </div>
- </div>
- <div class="image-uploader">
-    <div>
-        <label for="honors-and-awards-image">Honors and Awards Image</label>
-        <div>
-            <input name="honors-and-awards-image" type="hidden">
-            <div class="show-if-value">
-                <img class="upload-preview" src="" alt="">
-                <div class="acf-actions -hover">
-                    <a class="acf-icon -pencil dark custom-edit-metadata" data-name="edit" href="#" title="Edit"></a>
-                    <a class="acf-icon -cancel dark custom-remove-image" data-name="remove" href="#" title="Remove"></a>
-                </div>
-            </div>
-            <div class="hide-if-value">
-		        <p>No image selected <button data-name="add" class="image-uploader-btn" href="#">Add Image</button></p>
-	        </div>
-        </div>
-    </div>
- </div>
- <div class="image-uploader">
-    <div>
-        <label for="personal-icon-image">Personal Icon</label>
-        <div>
-            <input name="personal-icon-image" type="hidden">
-            <div class="show-if-value">
-                <img class="upload-preview" src="" alt="">
-                <div class="acf-actions custom-actions -hover">
-                    <a class="-pencil dark preview-icon custom-edit-metadata" data-name="edit" href="#" title="Edit"></a>
-                    <a class="acf-icon -cancel dark preview-icon custom-remove-image" data-name="remove" href="#" title="Remove"></a>
-                </div>
-            </div>  
-            <div class="hide-if-value">
-		        <p>No image selected <button data-name="add" class="image-uploader-btn" href="#">Add Image</button></p>
-	        </div>
-        </div>
-    </div>
-    
- </div>
-
 
 <?php
 get_footer();

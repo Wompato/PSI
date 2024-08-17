@@ -3,6 +3,7 @@
 namespace PSI\API;
 
 use PSI\Utils;
+use PSI\Users\PSI_User;
 
 class Endpoints {
 
@@ -54,6 +55,10 @@ class Endpoints {
         register_rest_route('psi/v1', '/users', array(
             'methods' => 'GET',
             'callback' => array(__CLASS__, 'get_users'),
+        ));
+        register_rest_route('psi/v1', '/find-experts', array(
+            'methods' => 'GET',
+            'callback' => array(__CLASS__, 'find_experts'),
         ));
         register_rest_route('psi/v1', '/funding-programs/(?P<termId>\d+)', array(
             'methods' => 'GET',
@@ -162,6 +167,22 @@ class Endpoints {
             return !\PSI\Utils::is_past_project($post);
         });
     
+        // Sort active projects to prioritize "Principal Investigator" role
+        usort($active_projects, function($a, $b) {
+            $a_psi_lead_role = get_post_meta($a->ID, 'psi_lead_role', true);
+            $b_psi_lead_role = get_post_meta($b->ID, 'psi_lead_role', true);
+    
+            // Prioritize "Principal Investigator" first
+            if ($a_psi_lead_role == 'Principal Investigator' && $b_psi_lead_role != 'Principal Investigator') {
+                return -1; // $a should come before $b
+            } elseif ($b_psi_lead_role == 'Principal Investigator' && $a_psi_lead_role != 'Principal Investigator') {
+                return 1; // $b should come before $a
+            }
+    
+            // If roles are equal or neither is "Principal Investigator", maintain the current order
+            return 0;
+        });
+    
         // Apply manual pagination
         $start_index = ($page ?: 0) * $posts_per_page + $posts_to_skip;
         $selected_projects = array_slice($active_projects, $start_index, $posts_per_page);
@@ -179,6 +200,7 @@ class Endpoints {
             'html' => $html,
         ]);
     }
+
     
     public static function get_past_projects($request) {
         $agency_id = $request->get_param('agency_id');
@@ -245,103 +267,75 @@ class Endpoints {
 
     public static function get_active_user_projects($request) {
         $user_id = $request->get_param('userID');
-        $page = $request->get_param('page');
-        $posts_per_page = $request->get_param('amount'); 
-        $posts_to_skip = $request->get_param('skip');
-        
-        $response = array();
-       
+        $page = $request->get_param('page') ?: 0; // Default to 0 if not provided
+        $posts_per_page = $request->get_param('amount') ?: 4; // Default to 4 if not provided
+        $posts_to_skip = $request->get_param('skip') ?: 0; // Default to 0 if not provided
+    
+        // Calculate offset based on page and posts to skip
+        $offset = ($page * $posts_per_page) + $posts_to_skip;
+    
+        // Validate the user ID
         if (empty($user_id)) {
             return new \WP_Error('invalid_parameter', __('User ID is required.'), array('status' => 400));
         }
     
-        $related_posts = get_field('related_projects_and_initiatives', 'user_' . $user_id);
+        // Fetch active projects using the updated function
+        $project_data = Utils::get_user_active_projects($user_id, $offset, $posts_per_page);
     
-        if (!$related_posts) {
-            return new \WP_Error('no_projects_found', __('No projects found for the user.'), array('status' => 404));
-        }
-
-        $active_related_posts = array_filter($related_posts, function($post) {
-            return get_post_type($post) === 'project' && !Utils::is_past_project($post);
-        });
-
-        usort($active_related_posts, function($a, $b) use ($user_id) {
-            return Utils::sort_user_projects($a, $b, $user_id);
-        });
-
-        $start_index = ($page ?: 0) * $posts_per_page + $posts_to_skip;
-        $posts = array_slice($active_related_posts, $start_index, $posts_per_page);
-
-        $has_more = count($active_related_posts) > $start_index + $posts_per_page;
-
+        // Prepare response
         $response = array(
-            'has_more' => $has_more,
-            'html' => '',
+            'has_more' => $project_data['has_more'],
+            'html' => ''
         );
-
-        if (!empty($posts)) {
+    
+        if (!empty($project_data['projects'])) {
             ob_start();
-            foreach ($posts as $post) {
-                get_template_part('template-parts/projects/activity-banner', '', array(
-                    'page' => $page,
-                    'post' => $post,
-                ));
+            foreach ($project_data['projects'] as $post) {
+                setup_postdata($post); // Set up post data for use in the template
+                get_template_part('template-parts/projects/activity-banner', '', array('post' => $post));
             }
+            wp_reset_postdata(); // Reset post data after loop
             $response['html'] = ob_get_clean();
         }
-
+    
         return rest_ensure_response($response);
     }
+    
 
     public static function get_past_user_projects($request) {
-        $user_id = $request->get_param('userID');
-        $page = $request->get_param('page');
-        $posts_per_page = $request->get_param('amount'); 
-        $posts_to_skip = $request->get_param('skip');
         
-        $response = array();
-       
+        $user_id = $request->get_param('userID');
+        $page = $request->get_param('page') ?: 0; // Default to 0 if not provided
+        $posts_per_page = $request->get_param('amount') ?: 4; // Default to 4 if not provided
+        $posts_to_skip = $request->get_param('skip') ?: 0; // Default to 0 if not provided
+    
+        // Calculate offset based on page and posts to skip
+        $offset = ($page * $posts_per_page) + $posts_to_skip;
+    
+        // Validate the user ID
         if (empty($user_id)) {
             return new \WP_Error('invalid_parameter', __('User ID is required.'), array('status' => 400));
         }
     
-        $related_posts = get_field('related_projects_and_initiatives', 'user_' . $user_id);
+        // Fetch active projects using the updated function
+        $project_data = Utils::get_user_past_projects($user_id, $offset, $posts_per_page);
     
-        if (!$related_posts) {
-            return new \WP_Error('no_projects_found', __('No projects found for the user.'), array('status' => 404));
-        }
-
-        // Filter out active projects
-        $past_related_posts = array_filter($related_posts, function($post) {
-            return Utils::is_past_project($post) === true;
-            
-        });
-
-        usort($past_related_posts, function($a, $b) use ($user_id) {
-            return Utils::sort_user_projects($a, $b, $user_id);
-        });
-
-        $start_index = ($page ?: 0) * $posts_per_page + $posts_to_skip;
-        $posts = array_slice($past_related_posts, $start_index, $posts_per_page);
-
-        $has_more = count($past_related_posts) > $start_index + $posts_per_page;
-
+        // Prepare response
         $response = array(
-            'has_more' => $has_more,
-            'html' => '',
+            'has_more' => $project_data['has_more'],
+            'html' => ''
         );
-
-        if (!empty($posts)) {
+    
+        if (!empty($project_data['projects'])) {
             ob_start();
-            foreach ($posts as $post) {
-                get_template_part('template-parts/projects/activity-banner', '', array(
-                    'page' => $page,
-                    'post' => $post,
-                ));
+            foreach ($project_data['projects'] as $post) {
+                setup_postdata($post); // Set up post data for use in the template
+                get_template_part('template-parts/projects/activity-banner', '', array('post' => $post));
             }
+            wp_reset_postdata(); // Reset post data after loop
             $response['html'] = ob_get_clean();
         }
-
+    
         return rest_ensure_response($response);
     }
 
@@ -570,6 +564,8 @@ class Endpoints {
     }
 
     public static function get_project($data) {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'project_user_roles';
         // Get the project ID from the request
         $project_id = $data['id'];
     
@@ -584,6 +580,25 @@ class Endpoints {
                 'error' => 'Project not found',
             );
             return rest_ensure_response($response);
+        }
+
+        // Query the custom table for user-role relationships
+        $relationship_data = $wpdb->get_results($wpdb->prepare("
+            SELECT user_id, role FROM $table_name WHERE project_id = %d", 
+            $project_id
+        ));
+
+        // Prepare the user-role relationship array
+        $user_roles = [];
+        foreach ($relationship_data as $relation) {
+            $user_info = get_userdata($relation->user_id);
+            if ($user_info) {
+                $user_roles[] = [
+                    'user_id' => $relation->user_id,
+                    'user_name' => $user_info->display_name,
+                    'role' => $relation->role
+                ];
+            }
         }
     
         // Get meta data for the project
@@ -668,6 +683,7 @@ class Endpoints {
             'post_id'           => $project_id,
             'funding_agency_data'  => $funding_agency_data,
             'funding_program_data'  => $funding_program_data,
+            'user_roles' => $user_roles
         );
 
         return rest_ensure_response($response);
@@ -814,6 +830,125 @@ class Endpoints {
 
         return rest_ensure_response($response);
     }
+
+    public static function find_experts($request) {
+        global $wpdb;
+    
+        // Extract search terms and logic from the request
+        $search_terms = $request->get_param('search_terms');
+        $logic = $request->get_param('logic') === 'AND' ? 'AND' : 'OR'; // Default to 'OR' if not 'AND'
+    
+        // Define the meta keys to search
+        $meta_keys = [
+            'targets_of_interests',
+            'disciplines_techniques',
+            'missions',
+            'mission_roles',
+            'instruments',
+            'facilities',
+            'professional_interests_professional_interests_text',
+            'professional_history_professional_history_text',
+            'honors_and_awards_honors_and_awards_text'
+        ];
+    
+        // Initialize an array to hold user IDs that match each term
+        $term_user_ids = [];
+    
+        foreach ($search_terms as $term) {
+            $term_value = $term['value']; // Extract the term value without any quotes
+            $term_conditions = [];
+            foreach ($meta_keys as $meta_key) {
+                if ($term['type'] === 'exact') {
+                    // Use REGEXP for exact word match within the text
+                    $condition = $wpdb->prepare(
+                        "(meta_key = %s AND (meta_value = %s OR meta_value LIKE %s OR meta_value LIKE %s OR meta_value LIKE %s OR meta_value REGEXP %s))",
+                        $meta_key,
+                        $term_value, // Exact match
+                        '%, ' . $wpdb->esc_like($term_value), // Ends with ", term"
+                        $wpdb->esc_like($term_value) . ', %', // Starts with "term, "
+                        '%, ' . $wpdb->esc_like($term_value) . ', %', // Contains ", term, "
+                        '(^|[[:space:]])' . $wpdb->esc_like($term_value) . '([[:space:]]|$)' // Exact word match
+                    );
+                } else if ($term['type'] === 'substring') {
+                    $condition = $wpdb->prepare(
+                        "(meta_key = %s AND meta_value LIKE %s)",
+                        $meta_key,
+                        '%' . $wpdb->esc_like($term_value) . '%'
+                    );
+                }
+                $term_conditions[] = $wpdb->remove_placeholder_escape($condition);
+            }
+            // Combine all term conditions with OR
+            $combined_conditions = '(' . implode(' OR ', $term_conditions) . ')';
+    
+            // Log the combined conditions for debugging
+            error_log("Combined conditions for term '{$term_value}': $combined_conditions");
+    
+            // Collect user IDs for this term
+            $query = "SELECT DISTINCT user_id FROM {$wpdb->usermeta} WHERE $combined_conditions";
+            error_log("Query for term '{$term_value}': $query");
+    
+            $results = $wpdb->get_results($query, ARRAY_A);
+    
+            // Log query errors if any
+            if ($wpdb->last_error) {
+                error_log("Query error for term '{$term_value}': " . $wpdb->last_error);
+            }
+    
+            $user_ids = array_column($results, 'user_id');
+            $term_user_ids[] = $user_ids;
+    
+            // Log the user IDs found for this term
+            error_log("User IDs for term '{$term_value}': " . implode(', ', $user_ids));
+        }
+    
+        // Combine user IDs based on logic
+        if ($logic === 'AND') {
+            // Intersect all arrays to find common user IDs
+            $final_user_ids = array_intersect(...$term_user_ids);
+            error_log("Final user IDs after AND logic: " . implode(', ', $final_user_ids));
+        } else {
+            // Union all arrays to find all matching user IDs
+            $final_user_ids = array_unique(array_merge(...$term_user_ids));
+            error_log("Final user IDs after OR logic: " . implode(', ', $final_user_ids));
+        }
+    
+        if (empty($final_user_ids)) {
+            return rest_ensure_response([]);
+        }
+    
+        // Fetch user details from wp_users using the collected user IDs
+        $user_ids_placeholder = implode(',', array_fill(0, count($final_user_ids), '%d'));
+        $sql = $wpdb->prepare(
+            "SELECT ID, user_login, display_name
+             FROM {$wpdb->users}
+             WHERE ID IN ($user_ids_placeholder)",
+            ...$final_user_ids
+        );
+    
+        // Log the final user details query
+        error_log("Final user details query: $sql");
+    
+        // Execute the final query
+        $users = $wpdb->get_results($sql);
+    
+        // Log query errors if any
+        if ($wpdb->last_error) {
+            error_log("User details query error: " . $wpdb->last_error);
+            return new WP_Error('database_error', 'Error executing user details query', array('status' => 500));
+        }
+    
+        $response = array_map(function ($user) {
+            return [
+                'display_name' => $user->display_name,
+                'permalink' => PSI_User::get_user_profile_url($user->ID)
+            ];
+        }, $users);
+    
+        return rest_ensure_response($response);
+    }
+    
+    
     
     // Function to format file size in a human-readable format
     private static function formatBytes($bytes, $decimals = 2) {

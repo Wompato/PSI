@@ -162,7 +162,7 @@ class FormHandler {
         }
     
         // Check if the PSI lead matches the current user
-        if (isset($psi_lead[0]->ID) && $user_id === $psi_lead[0]->ID) {
+        if (isset($psi_lead->ID) && $user_id === $psi_lead->ID) {
             return $form; // Allow PSI lead to access the form
         }
     

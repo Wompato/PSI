@@ -85,7 +85,9 @@ $base_url = get_bloginfo('url');
     
 $related_posts = get_field('related_posts', 'user_' . $user_id);    
     
-$related_projects = get_field('related_projects_and_initiatives', 'user_' . $user_id);
+// Fetch active and past projects
+$active_projects_result = Utils::get_user_active_projects($user_id);
+$past_projects_result = Utils::get_user_past_projects($user_id);
 
 ?>
 <article id="post-<?php the_ID(); ?>" <?php post_class(); ?> data-user="<?php echo $user_id; ?>">
@@ -98,7 +100,7 @@ $related_projects = get_field('related_projects_and_initiatives', 'user_' . $use
                     <h2 class="staff-info staff__position"><?php echo $position ? $position : ''; ?></h2>
                     <p class="staff-info"> <i><?php echo $location ? 'Currently resides in ' . $location : ''; ?></i></p>
                         <div class="optional-staff-links">
-                            <?php if(PSI_User::is_staff_member($user_id) || PSI_User::is_staff_member_editor($user_id) || current_user_can('manage_options')) { 
+                            <?php if(($user_id == get_current_user_id()) || PSI_User::is_staff_member_editor() || current_user_can('manage_options')) { 
                                 $edit_profile_url = trailingslashit($base_url) . 'edit-user';
                                 $edit_profile_url .= '?s_m=' . $user_id; ?>
                                 <a href="<?php echo esc_url($edit_profile_url); ?>">Edit Profile</a>    
@@ -106,12 +108,15 @@ $related_projects = get_field('related_projects_and_initiatives', 'user_' . $use
                             <?php if(PSI_User::is_staff_member_editor($user_id) || current_user_can('administrator')) { 
                                 $create_project_url = trailingslashit($base_url) . 'create-project';
                                 $edit_project_url = trailingslashit($base_url) . 'edit-project';
-                                $create_post_url = trailingslashit($base_url) . 'press-submission'; ?>
+                                $create_post_url = trailingslashit($base_url) . 'press-submission'; 
+                                $edit_post_url = trailingslashit($base_url) . 'edit-article'; 
+                                ?>
                                 <div>
                                     <a href="<?php echo esc_url($create_project_url); ?>">Create Project</a> | <a href="<?php echo esc_url($edit_project_url); ?>">Edit Project</a>
                                 </div>
-                                
-                                <a href="<?php echo esc_url($create_post_url); ?>">Create or Search Press/Cover Page</a>   
+                                <div>
+                                    <a href="<?php echo esc_url($create_post_url); ?>">Create Press/Cover Page</a> | <a href="<?php echo esc_url($edit_post_url); ?>">Edit Press/Cover Page</a>
+                                </div>  
                             <?php } ?>                   
                         </div>
                 </div>
@@ -253,67 +258,55 @@ $related_projects = get_field('related_projects_and_initiatives', 'user_' . $use
                     </p>
                 </section>
             <?php } ?>
-            <?php if ($related_projects) { 
-                $has_past_projects = false;
-                $has_active_projects = false;
-                $posts_per_page = 4;
+        
+            <?php if ($active_projects_result['projects'] || $past_projects_result['projects']) { 
 
-                $active_related_posts = array_filter($related_projects, function($post) use (&$has_past_projects, &$has_active_projects) {
-                    if (!Utils::is_past_project($post)) {
-                        // If it's an active project, return true to keep it in the filtered array
-                        $has_active_projects = true;
-                        return true;
-                    } else {
-                        // If it's a past project, set the flag and return false to exclude it from the filtered array
-                        $has_past_projects = true;
-                        return false;
-                    }
-                });
-
-                if(empty($active_related_posts)) {
-                    $active_related_posts = array_filter($related_projects, function($post) use (&$has_past_projects) {
-                        if (Utils::is_past_project($post)) {
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    });
-                }
-
-                usort($active_related_posts, function($a, $b) use ($user_id) {
-                    return Utils::sort_user_projects($a, $b, $user_id);
-                });
-            
-                $initial_projects = array_slice($active_related_posts, 0, $posts_per_page);
+                // If active projects is populated or not
+                $display_active_projects = count($active_projects_result['projects']) > 0;
                 
-                if(empty($initial_projects)) {
-                    // Return some error which says that there were no initial posts found  
-                    //return false;
-                }
-
-                // Check if there are additional posts beyond the initial posts
-                $has_more_posts = count($active_related_posts) > $posts_per_page;
-                    
                 ?>
                 <section class="related-projects">
                     <div class="section-headline">
-                        <h4 id="projects-headline"><?php echo $has_active_projects ? 'ACTIVE PROJECTS' : 'PAST PROJECTS' ?></h4>
+                        <h4 id="projects-headline">
+                            <?php if(count($active_projects_result['projects']) > 0) {
+                                echo 'ACTIVE PROJECTS';
+                            } elseif(count($past_projects_result['projects']) > 0) {
+                                echo 'PAST PROJECTS';
+                            } else {
+                                echo '';
+                            } ?>  
+                        </h4>
                         
-                        <?php if($has_past_projects && $has_active_projects) { ?>
+                        <?php if($active_projects_result['projects'] && $past_projects_result['projects']) { ?>
                             <i class="fa-solid fa-box-archive" style="padding-right: 0.5rem;"></i><span class="swap-projects" id="past-projects">Past Projects</span>
                         <?php } ?>
                     </div>
                     <div id="related-projects-container">
                         <?php
-                        foreach ($initial_projects as $post) {
-                            get_template_part('template-parts/projects/activity-banner', '', array(
-                                'post' => $post,
-                            ));
-                        }   
+                        if($active_projects_result['projects'] && !$past_projects_result['projects']) {
+                            foreach ($active_projects_result['projects'] as $post) {
+                                get_template_part('template-parts/projects/activity-banner', '', array(
+                                    'post' => $post,
+                                ));
+                            }
+                        } else if (!$active_projects_result['projects'] && $past_projects_result['projects']) {
+                            foreach ($past_projects_result['projects'] as $post) {
+                                get_template_part('template-parts/projects/activity-banner', '', array(
+                                    'post' => $post,
+                                ));
+                            }
+                        } else if ($active_projects_result['projects'] && $past_projects_result['projects']) {
+                            foreach ($active_projects_result['projects'] as $post) {
+                                get_template_part('template-parts/projects/activity-banner', '', array(
+                                    'post' => $post,
+                                ));
+                            }
+                        }
+                         
                         ?>
                     </div>
                     <div class="project-loader-container">
-                        <?php if($has_more_posts) { ?>
+                        <?php if($active_projects_result['has_more']) { ?>
                             <div id="load-more-related-projects">Load More<i class="fa-solid fa-angle-right"></i></div>
                         <?php } ?>
                     </div>  

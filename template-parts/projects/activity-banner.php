@@ -1,5 +1,7 @@
 <?php
 
+use \PSI\Utils;
+
 $post = $args['post'];
 
 if(isset($args['page'])) {
@@ -8,15 +10,19 @@ if(isset($args['page'])) {
     $page = '';
 }
 
-$pi_data = get_field('psi_lead', $post->ID);
+$psi_lead_data = get_field('psi_lead', $post->ID);
 $psi_lead_role = get_field('psi_lead_role', $post->ID);
-$pi_id = 0;
-if($pi_data){
-    $pi_id =  $pi_data[0]->ID;
-}
 
-$pi_images = get_field('profile_pictures', 'user_' . $pi_id);
-$pi_slug = get_field('user_slug', 'user_' . $pi_id);
+if(is_array($psi_lead_data)) {
+    $psi_lead_id   = $psi_lead_data[0]->ID;
+    $psi_lead_name = $psi_lead_data[0]->display_name;
+  } else {
+    $psi_lead_id   = $psi_lead_data->ID;
+    $psi_lead_name = $psi_lead_data->display_name;
+  }
+
+$pi_images = get_field('profile_pictures', 'user_' . $psi_lead_id);
+$pi_slug = get_field('user_slug', 'user_' . $psi_lead_id);
 
 $nickname = get_field('nickname', $post->ID);
 $title = $post->post_title;
@@ -24,7 +30,7 @@ $funding_instrument = get_field('funding_instrument', $post->ID);
 $is_sub_contrt_awrd = false;
 
 
-$co_primary_investigator_data = get_field('co_principal_investigator') ?: [];
+/* $co_primary_investigator_data = get_field('co_principal_investigator') ?: [];
 $co_investigators_data = get_field('co-investigators') ?: [];
 $collaborators_data = get_field('collaborators') ?: [];
 $supporters_data = get_field('support') ?: [];
@@ -40,7 +46,9 @@ $psi_team = array_merge(
   $science_pi_data,
   $post_doc_data,
   $graduate_data
-);
+); */
+
+$psi_team = Utils::get_project_users($post->ID);
 
 $non_psi_personnel = get_field('non-psi_personnel', $post->ID);
 // Unserialize the string to get an array
@@ -187,7 +195,7 @@ if(!$featured_image) {
 // Get the project permalink
 $project_permalink = get_permalink();
 
-$user_slug = get_field('user_slug', 'user_' . $pi_id);
+$user_slug = get_field('user_slug', 'user_' . $psi_lead_id);
 $user_permalink = home_url() . '/staff/profile/' . $user_slug;
 ?>
 <div class="activity-banner <?php echo $page ? 'page' . $page : '';?> <?php echo str_replace(" ", "-", strtolower($psi_lead_role)); ?>">
@@ -226,7 +234,7 @@ $user_permalink = home_url() . '/staff/profile/' . $user_slug;
         </h4>
         <a href="<?php echo home_url('/staff/profile/' . $pi_slug); ?>">
             <img src="<?php echo $pi_img_url; ?>" alt="<?php echo $pi_img_alt;?>">
-            <div><?php echo $pi_data ? $pi_data[0]->display_name : ''; ?></div>  
+            <div><?php echo $psi_lead_name; ?></div>  
         </a>
         <?php if($psi_lead_role === 'Institutional PI') { ?>
             <div class="seperator"></div>
@@ -250,20 +258,21 @@ $user_permalink = home_url() . '/staff/profile/' . $user_slug;
             
         <?php } ?>
     </div>
+    <?php if($psi_team) { ?>
     <div class="project-team">
         <h4>Project Team</h4>
         <div class="project-team-member-container">
         <?php
-            foreach ($psi_team as $coi_collabs) { 
-                if($coi_collabs instanceof WP_User) {
+            foreach ($psi_team as $user) { 
+                if(is_object($user)) {
                     get_template_part('template-parts/related-staff-member', '', array(
-                        'staff-member' => $coi_collabs
+                        'staff-member' => $user
                     ));
                 } else { ?>
                     <div class="staff-member">
                         <div class="pte-member">
-                            <p><?php echo $coi_collabs['Name']; ?></p>
-                            <p><?php echo $coi_collabs['Institution']; ?></p>
+                            <p><?php echo $user['Name']; ?></p>
+                            <p><?php echo $user['Institution']; ?></p>
                         </div>
                     </div>
                 <?php } 
@@ -271,5 +280,6 @@ $user_permalink = home_url() . '/staff/profile/' . $user_slug;
         ?>
         </div>
     </div>
+    <?php } ?>
 </div>
 

@@ -24,27 +24,45 @@ class GravityFormsCustomizations {
 	* when populating into a Date field.
 	* Used for form 16 (edit article)
 	*/
-	public function processTemplateDate( $value, $field, $template_name, $populate, $object, $object_type, $objects, $template ) {
-		if($field->formId == 16) {
-			if($field->id == 13) {
-				$date = new DateTime($value);
-				$value = $date->format('m/d/Y');
-			}
-			if($field->id == 14) {
-				$value = date_format( date_create_from_format( 'Y-m-d H:i:s', $value ), 'h:i A' );
+	public function processTemplateDate($value, $field, $template_name, $populate, $object, $object_type, $objects, $template) {
+		// Check if $field is an object or an array and retrieve formId and id accordingly
+		if ((is_object($field) && property_exists($field, 'formId') && property_exists($field, 'id')) || 
+			(is_array($field) && isset($field['formId']) && isset($field['id']))) {
+			
+			$formId = is_object($field) ? $field->formId : $field['formId'];
+			$fieldId = is_object($field) ? $field->id : $field['id'];
+	
+			if ($formId == 16) {
+				if ($fieldId == 13) {
+					$date = new DateTime($value);
+					$value = $date->format('m/d/Y');
+				}
+				if ($fieldId == 14) {
+					$value = date_format(date_create_from_format('Y-m-d H:i:s', $value), 'h:i A');
+				}
 			}
 		}
+	
 		return $value;
 	}
+	
 
     public function processTemplateValue($template_value, $field, $template_name, $populate, $object, $object_type, $objects) {
-        if (strpos($field->cssClass, 'gppa-format-acf-date') === false) {
-            return $template_value;
-        }
-
-        $date = DateTime::createFromFormat('Ymd', $template_value);
-        return $date ? wp_date('m/d/Y', $date->getTimestamp()) : $template_value;
-    }
+		// Check if $field is an object and has the cssClass property
+		if ((is_object($field) && property_exists($field, 'cssClass')) || (is_array($field) && isset($field['cssClass']))) {
+			$cssClass = is_object($field) ? $field->cssClass : $field['cssClass'];
+	
+			if (strpos($cssClass, 'gppa-format-acf-date') === false) {
+				return $template_value;
+			}
+	
+			$date = DateTime::createFromFormat('Ymd', $template_value);
+			return $date ? wp_date('m/d/Y', $date->getTimestamp()) : $template_value;
+		}
+	
+		// If $field is neither an object with cssClass property nor an array with cssClass key, return the template value as is
+		return $template_value;
+	}
 
     public function liveMergeTagValue($merge_tag_match_value, $merge_tag, $form, $field_id, $entry_values) {
         $bits = explode(':', str_replace(['{', '}'], '', $merge_tag));

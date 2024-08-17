@@ -3,6 +3,7 @@ let articleArgs = {
     medium: 3,
     large: 4,
     xl: 2,
+    lazyLoad: 'ondemand',
     responsive: [
         {
             breakpoint: 1224,
@@ -44,6 +45,7 @@ let projectArgs = {
     medium: 4,
     large: 4,
     xl: 3,
+    lazyLoad: 'ondemand',
     responsive: [
         {
             breakpoint: 1224,

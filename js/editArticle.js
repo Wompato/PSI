@@ -114,7 +114,7 @@ window.gform.addFilter('gpadvs_settings', function(settings, gpadvs, selectNames
         }
 
         settings.onInitialize = function () {
-            const articleSelect = document.querySelector('#field_16_16 .ts-control');
+            const articleSelect = document.querySelector('#field_17_16 .ts-control');
             articleSelect.children.forEach(function(el) {
                 if(el.dataset.value){
                     previousSelections.add(el.dataset.value);
@@ -123,7 +123,7 @@ window.gform.addFilter('gpadvs_settings', function(settings, gpadvs, selectNames
             })
         }
 
-        const articleSelect = document.querySelector('#input_16_1');
+        const articleSelect = document.querySelector('#input_17_16');
         articleSelect.addEventListener('change', function() {
             previousSelections.clear();
             jQuery('.project-list').empty();

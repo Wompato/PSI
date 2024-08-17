@@ -5,11 +5,11 @@ require_once __DIR__ . '/vendor/autoload.php';
 class PSI_Child_Theme {
     public function __construct() { 
 
-        PSI\Users\PSI_User::getInstance();
-        PSI\Rewrites::getInstance();
-        PSI\Shortcodes\PSI_Shortcodes::getInstance();
-        PSI\Widgets\Widget_Loader::init();
-        PSI\Forms\FormHandler::getInstance();
+        \PSI\Users\PSI_User::getInstance();
+        \PSI\Rewrites::getInstance();
+        \PSI\Shortcodes\PSI_Shortcodes::getInstance();
+        \PSI\Widgets\Widget_Loader::init();
+        \PSI\Forms\FormHandler::getInstance();
 
         add_action('rest_api_init', [PSI\API\Endpoints::class, 'register_endpoints']);
         
@@ -63,6 +63,26 @@ class PSI_Child_Theme {
             return $block_content;
         }, 10, 2);
         
+        add_action( 'login_enqueue_scripts', array($this, 'login_logo'));
+
+        add_action('gform_enqueue_scripts', array('GF_Field_User_List', 'enqueue_scripts'), 10, 1);
+
+    }
+
+    public function login_logo() {
+        $logo_url = content_url('uploads/psi-logo-seal.svg');
+        ?>
+        <style type="text/css">
+            #login h1 a, .login h1 a {
+                background-image: url(<?php echo $logo_url; ?>);
+                height: 65px;  // Adjust according to your logo's height
+                width: 320px;  // Adjust according to your logo's width
+                background-size: 320px 65px;  // Adjust according to your logo's width and height
+                background-repeat: no-repeat;
+                padding-bottom: 30px;
+            }
+        </style>
+        <?php
     }
 
     /**
@@ -149,9 +169,10 @@ class PSI_Child_Theme {
     }
 
     public function enqueue_custom_scripts() {
+        
         // JS for the user profile pages (only load if on the /profile/ route)
         if (is_page() && strpos($_SERVER['REQUEST_URI'], '/profile/') !== false) {
-            wp_enqueue_script('user-profile-scripts', get_stylesheet_directory_uri() . '/js/script.js', array('jquery'), '1.2', true);
+            wp_enqueue_script('user-profile-scripts', get_stylesheet_directory_uri() . '/js/script.js', array('jquery'), '1.4', true);
         }
             
         if(!is_singular('post')){
@@ -164,11 +185,11 @@ class PSI_Child_Theme {
         }
 
         if(is_page('active-projects')){
-            wp_enqueue_script('active-projects-scripts', get_stylesheet_directory_uri() . '/js/projects/active-projects.js', array('jquery'), '1.0', true);
+            wp_enqueue_script('active-projects-scripts', get_stylesheet_directory_uri() . '/js/projects/active-projects.js', array('jquery'), '1.1', true);
         }
 
         if(is_page('past-projects')){
-            wp_enqueue_script('past-projects-scripts', get_stylesheet_directory_uri() . '/js/projects/past-projects.js', array('jquery'), '1.0', true);
+            wp_enqueue_script('past-projects-scripts', get_stylesheet_directory_uri() . '/js/projects/past-projects.js', array('jquery'), '1.1', true);
         }
 
         if(is_page('edit-staff-page')){
@@ -176,11 +197,13 @@ class PSI_Child_Theme {
         }
 
         if(is_page('edit-article')){
-            wp_enqueue_script('edit-article', get_stylesheet_directory_uri() . '/js/editArticle.js', array('jquery'), '1.4', true);
-        }
+            //wp_enqueue_script('tom-select', 'https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js', array(), '', true);
+            wp_enqueue_script('edit-article', get_stylesheet_directory_uri() . '/js/editArticle.js', array('jquery'), '1.5', true);
+        } 
             
         if(is_page('press-submission')){
-            wp_enqueue_script('article-form', get_stylesheet_directory_uri() . '/js/articleForm.js', array('jquery'), null, true);
+            //wp_enqueue_script('tom-select', 'https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js', array(), '', true);
+            wp_enqueue_script('article-form', get_stylesheet_directory_uri() . '/js/articleForm.js', array('jquery'), '1.1', true);
         }
 
         if(is_page('edit-user')) {
@@ -188,16 +211,13 @@ class PSI_Child_Theme {
         }
 
         if(is_page('edit-project')){
-            wp_enqueue_script('edit-projects-scripts', get_stylesheet_directory_uri() . '/js/projects/editProject.js', array('jquery'), '2.0', true);
-            wp_enqueue_script('tom-select', 'https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js', array(), '', true);
-            //wp_enqueue_script('tom-select-styles', 'https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css', array(), '', true);
+           // wp_enqueue_script('tom-select', 'https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js', array(), '', true);
+            wp_enqueue_script('edit-projects-scripts', get_stylesheet_directory_uri() . '/js/projects/editProject.js', array('jquery'), '2.2', true);
         }
 
-        if(is_page('create-project')) {
-            wp_enqueue_script('tom-select', 'https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js', array(), null, true);
-            wp_enqueue_script('create-projects-scripts', get_stylesheet_directory_uri() . '/js/projects/createProject.js', array('jquery'), '1.2', true);
+        if(is_page('find-an-expert')) {
+            wp_enqueue_script('find-an-expert', get_stylesheet_directory_uri() . '/js/findAnExpert.js', array('jquery'), '1.3', true);
         }
-
         
     }
     
@@ -215,3 +235,118 @@ class PSI_Child_Theme {
 }
 
 $psi_theme = new PSI_Child_Theme();
+
+if (class_exists('GF_Field')) {
+    class GF_Field_User_List extends GF_Field {
+
+        public $type = 'user_list';
+
+        public $choices = [
+            ['text' => 'Co-Principal Investigator', 'value' => 'Co-Principal Investigator'],
+            ['text' => 'Science PI', 'value' => 'Science PI'],
+            ['text' => 'Co-Investigator', 'value' => 'Co-Investigator'],
+            ['text' => 'Postdoctoral Associate', 'value' => 'Postdoctoral Associate'],
+            ['text' => 'Collaborator', 'value' => 'Collaborator'],
+            ['text' => 'Graduate Student', 'value' => 'Graduate Student'],
+            ['text' => 'Support', 'value' => 'Support']
+        ];
+
+        public function get_form_editor_field_title() {
+            return esc_html__('Other PSI Personnel', 'your-text-domain');
+        }
+
+        public function get_form_editor_field_settings() {
+            return array(
+                'label_setting',
+                'description_setting',
+                'css_class_setting',
+                'choices_setting', // Enables choice editing in the form editor
+                'rules_setting'
+            );
+        }
+
+        // Register the field with Gravity Forms
+        public static function register() {
+            if (method_exists('GF_Fields', 'register')) {
+                GF_Fields::register(new self());
+            }
+        }
+
+        public function get_field_input($form, $value = '', $entry = null) {
+            $id = (int) $this->id;
+            $form_id = $form['id'];
+            $field_id = 'input_' . $form_id . '_' . $id;
+        
+            if ($this->is_form_editor()) {
+                // More complex editor setup
+                $choices_markup = '';
+                foreach ($this->choices as $choice) {
+                    $choices_markup .= sprintf('<option value="%s">%s</option>', esc_attr($choice['value']), esc_html($choice['text']));
+                }
+        
+                $markup = <<<HTML
+                <div class="other_psi_personnel">
+                    <div class="list-group-labels">
+                        <div>Name</div>
+                        <div>Role</div>
+                    </div>
+                    <div class="list-group">
+                        <div class="list-group-item">
+                            <select class="first-select" name="{$field_id}_name" id="tomselect-{$id}">
+                            </select>
+                        </div>
+                        <div class="list-group-item">
+                            <select class="second-select" name="{$field_id}_role">
+                                $choices_markup
+                            </select>
+                        </div>
+                    </div>
+                </div>
+        HTML;
+            } else {
+                // Simpler frontend setup
+                $markup = <<<HTML
+                <div class="ginput_container">
+                    <div class="other_psi_personnel">
+                        <div class="list-group-labels">
+                            <div>Name</div>
+                            <div>Role</div>
+                        </div>
+                    </div>
+                    <input id="other-psi_personnel-input" style="display:none;" type="text" name="other-psi-personnel">
+                </div>
+        HTML;
+            }
+        
+            return $markup;
+        }
+          
+        public static function enqueue_scripts($form) {
+            $form_id = $form['id'];
+            
+            $script_dependencies = array('jquery', 'tom-select');
+        
+            foreach ($form['fields'] as $field) {
+                if ($field->type === 'user_list') {
+                    wp_register_script('user_list', get_stylesheet_directory_uri() . '/js/gforms/userList.js', $script_dependencies, '1.0', true);
+                    wp_enqueue_script('tom-select', 'https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js', array(), '', true);
+        
+                    // Get dynamic choices from the field if set by the user
+                    $choices = isset($field->choices) ? $field->choices : [];
+        
+                    // Localize script to pass PHP data to JavaScript
+                    wp_localize_script('user_list', 'formData', array(
+                        'formId' => $form_id,
+                        'roles'  => $choices
+                    ));
+
+                    wp_enqueue_script('user_list');
+         
+                    break; // Since the required field is found, no need to continue
+                }
+            }
+        }
+    }
+
+    GF_Field_User_List::register();
+}
