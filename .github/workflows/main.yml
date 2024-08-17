@@ -16,9 +16,9 @@ jobs:
     - name: Sync files to staging server
       uses: easingthemes/ssh-deploy@v2.1.5
       with:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_MASTER }}
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_DEPLOYMENT }}
         REMOTE_HOST: "68.66.226.89"
-        REMOTE_USER: "ssh_master"
+        REMOTE_USER: "ssh_deployment"
         REMOTE_PORT: "7822" 
         SOURCE: "./"
         TARGET: "/home/psiedu/staging.psi.edu/wp-content/themes/generatepress_child"
