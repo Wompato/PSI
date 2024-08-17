@@ -19,5 +19,5 @@ jobs:
     - name: Sync files to staging server
       run: |
         sshpass -p "${{ secrets.SSH_PSWD }}" rsync -avz --delete \
-        -e "ssh -o StrictHostKeyChecking=no -o PreferredAuthentications=password -o PubkeyAuthentication=no -p 7822" \
+        -e "ssh -o StrictHostKeyChecking=no -p 7822" \
         ./ ${{ secrets.SSH_USER }}@${{ secrets.VPS_IP }}:/home/psiedu/staging.psi.edu/wp-content/themes/generatepress_child/
