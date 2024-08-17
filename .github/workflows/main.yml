@@ -1,4 +1,4 @@
-name: Deploy to Staging
+name: 🚀 Deploy website on push
 
 on:
   push:
@@ -6,16 +6,16 @@ on:
       - staging
 
 jobs:
-  deploy:
+  web-deploy:
+    name: 🎉 Deploy
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-
-    - name: Install lftp
-      run: sudo apt-get install -y lftp
-
-    - name: Deploy files via FTP
-      run: |
-        lftp -c "set ssl:verify-certificate no; open -u ashelton@staging.psi.edu,Q#M=q{^l4MbV -p 21 staging.psi.edu; mirror -R --delete --verbose ./ /wp-content/themes/generatepress_child/"
+    - name: 🚚 Get latest code
+      uses: actions/checkout@v4
+    
+    - name: 📂 Sync files
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      with:
+        server: 68.66.226.89
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
