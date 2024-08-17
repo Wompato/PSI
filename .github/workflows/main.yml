@@ -19,3 +19,4 @@ jobs:
         server: 68.66.226.89
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
+        server-dir: /wp-content/themes/generatepress_child/
