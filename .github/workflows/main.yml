@@ -17,10 +17,9 @@ jobs:
       uses: easingthemes/ssh-deploy@v2.1.5
       env:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_MASTER }}
-        ARGS: "-rltgoDzvO --delete"
-        SOURCE: "./"
-        REMOTE_HOST: "68.66.226.89"
-        REMOTE_USER: "ssh_master"
-        TARGET: "/home/psiedu/staging.psi.edu/wp-content/themes/generatepress_child"
-        TIMEOUT: 300
-        PORT: "7822"
+      with:
+        args: "-rltgoDzvO --delete --rsh='ssh -p 7822 -o StrictHostKeyChecking=no'"
+        source: "./"
+        remote_host: "68.66.226.89"
+        remote_user: "ssh_master"
+        target: "/home/psiedu/staging.psi.edu/wp-content/themes/generatepress_child"
