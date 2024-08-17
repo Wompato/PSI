@@ -18,4 +18,4 @@ jobs:
 
     - name: Deploy files via FTP
       run: |
-        lftp -c "open -u ashelton@staging.psi.edu,Q#M=q{^l4MbV -p 21 68.66.226.89; mirror -R --delete --verbose ./ /wp-content/themes/generatepress_child/"
+        lftp -c "set ssl:verify-certificate no; open -u ashelton@staging.psi.edu,Q#M=q{^l4MbV -p 21 staging.psi.edu; mirror -R --delete --verbose ./ /wp-content/themes/generatepress_child/"
