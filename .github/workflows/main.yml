@@ -19,7 +19,7 @@ jobs:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_MASTER }}
         ARGS: "-rltgoDzvO --delete"
         SOURCE: "./"
-        REMOTE_HOST: "staging.psi.edu"
+        REMOTE_HOST: "68.66.226.89"
         REMOTE_USER: "ssh_master"
         TARGET: "/home/psiedu/staging.psi.edu/wp-content/themes/generatepress_child"
         TIMEOUT: 300
