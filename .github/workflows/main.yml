@@ -13,13 +13,11 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
+    - name: Install sshpass
+      run: sudo apt-get install sshpass
+
     - name: Sync files to staging server
-      uses: easingthemes/ssh-deploy@v2.1.5
-      with:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_DEPLOYMENT }}
-        REMOTE_HOST: "68.66.226.89"
-        REMOTE_USER: "ssh_deployment"
-        REMOTE_PORT: "7822" 
-        SOURCE: "./"
-        TARGET: "/home/psiedu/staging.psi.edu/wp-content/themes/generatepress_child"
-        ARGS: "-rltgoDzvO --delete"
+      run: |
+        sshpass -p "${{ secrets.SSH_PSWD }}" rsync -avz --delete \
+        -e "ssh -o StrictHostKeyChecking=no -p 7822" \
+        ./ ${{ secrets.SSH_USER }}@${{ secrets.VPS_IP }}:/home/psiedu/staging.psi.edu/wp-content/themes/generatepress_child/
