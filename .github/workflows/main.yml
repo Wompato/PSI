@@ -13,11 +13,9 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Install sshpass
-      run: sudo apt-get install -y sshpass
+    - name: Install lftp
+      run: sudo apt-get install -y lftp
 
-    - name: Sync files to staging server
+    - name: Deploy files via FTP
       run: |
-        sshpass -p "${{ secrets.SSH_PSWD }}" rsync -avz --delete \
-        -e "ssh -o StrictHostKeyChecking=no -o PreferredAuthentications=password -o PubkeyAuthentication=no -p 7822" \
-        ./ ${{ secrets.SSH_USER }}@${{ secrets.VPS_IP }}:/home/psiedu/staging.psi.edu/wp-content/themes/generatepress_child/
+        lftp -c "open -u ashelton@staging.psi.edu,Q#M=q{^l4MbV -p 21 68.66.226.89; mirror -R --delete --verbose ./ /wp-content/themes/generatepress_child/"
