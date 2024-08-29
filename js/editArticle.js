@@ -1,3 +1,17 @@
+function getGravityFormId() {
+    // Get the Gravity Forms wrapper element
+    const gfWrapper = document.querySelector('.gform_wrapper');
+
+    // Extract the form ID from the wrapper element
+    if (gfWrapper) {
+        return gfWrapper.id.split('_')[2]; // Splits "gform_wrapper_X" and returns the form ID "X"
+    }
+
+    return null;
+}
+
+gformId = getGravityFormId();
+
 function performAjaxRequest(dataValue) {
     // Perform AJAX request only if the item is a user selection
     
@@ -48,7 +62,7 @@ function performAjaxRequest(dataValue) {
                 // Create a link element
                 const link = jQuery('<a>').attr({
                     'href': projectLink,
-                    'target': '_blank', // Open link in a new tab
+                    'target': '_blank',
                     'data-id': projectId
                 }).text('View Project');
 
@@ -82,11 +96,12 @@ function performAjaxRequest(dataValue) {
     
 }
 
-// Keep track of previously selected items
 const previousSelections = new Set();
 
 window.gform.addFilter('gpadvs_settings', function(settings, gpadvs, selectNamespace) {
     if(gpadvs.fieldId == '16') {
+
+        const articleSelect = document.querySelector(`#input_${gformId}_16`);
 
         // Add event listener for item_add event
         settings.onItemAdd = function(value, item) {
@@ -114,7 +129,7 @@ window.gform.addFilter('gpadvs_settings', function(settings, gpadvs, selectNames
         }
 
         settings.onInitialize = function () {
-            const articleSelect = document.querySelector('#field_17_16 .ts-control');
+            const articleSelect = document.querySelector(`#field_${gformId}_16 .ts-control`);
             articleSelect.children.forEach(function(el) {
                 if(el.dataset.value){
                     previousSelections.add(el.dataset.value);
@@ -123,7 +138,6 @@ window.gform.addFilter('gpadvs_settings', function(settings, gpadvs, selectNames
             })
         }
 
-        const articleSelect = document.querySelector('#input_17_16');
         articleSelect.addEventListener('change', function() {
             previousSelections.clear();
             jQuery('.project-list').empty();
@@ -136,7 +150,7 @@ window.gform.addFilter('gpadvs_settings', function(settings, gpadvs, selectNames
 			this.refreshOptions();
         };
     }
-    // Return modified settings object
+    
     return settings;
 });
 

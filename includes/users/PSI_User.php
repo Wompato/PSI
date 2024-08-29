@@ -16,6 +16,11 @@ class PSI_User {
         add_action('admin_init', array($this, 'restrict_non_admin_access'));
         // Hide admin bar for staff members and staff member editors
         add_action('init', array($this, 'hide_admin_bar_for_staff'));
+        add_action('admin_menu', array($this, 'hide_admin_menus'), 999);
+
+        add_filter('acf/load_field_group', array($this, 'hide_acf_fields'));
+        
+        add_action('init', array($this, 'add_project_caps'), 11);
     }
 
     public static function getInstance() {
@@ -54,6 +59,60 @@ class PSI_User {
             __('Staff Member Editor'),
             get_role('staff_member')->capabilities
         );
+    }
+
+    public function hide_acf_fields($field_group) {
+        
+        if (!current_user_can('administrator')) {
+            // User Profile Fields
+            $hidden_field_groups = array('group_652f53160f1a4');
+
+            if (in_array($field_group['key'], $hidden_field_groups)) {
+                return false;
+            }
+        }
+
+        return $field_group;
+    }
+
+    public function add_project_caps() {
+        
+        $admin = get_role('administrator');
+        if ($admin) {
+            $admin->add_cap('edit_project');
+            $admin->add_cap('read_project');
+            $admin->add_cap('delete_project');
+            $admin->add_cap('edit_projects');
+            $admin->add_cap('edit_others_projects');
+            $admin->add_cap('publish_projects');
+            $admin->add_cap('read_private_projects');
+            $admin->add_cap('delete_projects');
+            $admin->add_cap('delete_private_projects');
+            $admin->add_cap('delete_published_projects');
+            $admin->add_cap('delete_others_projects');
+            $admin->add_cap('edit_private_projects');
+            $admin->add_cap('edit_published_projects');
+            $admin->add_cap('create_projects');
+        }
+
+        $editor = get_role('editor');
+        if ($editor) {
+            $editor->remove_cap('edit_project');
+            $editor->remove_cap('read_project');
+            $editor->remove_cap('delete_project');
+            $editor->remove_cap('edit_projects');
+            $editor->remove_cap('edit_others_projects');
+            $editor->remove_cap('publish_projects');
+            $editor->remove_cap('read_private_projects');
+            $editor->remove_cap('delete_projects');
+            $editor->remove_cap('delete_private_projects');
+            $editor->remove_cap('delete_published_projects');
+            $editor->remove_cap('delete_others_projects');
+            $editor->remove_cap('edit_private_projects');
+            $editor->remove_cap('edit_published_projects');
+            $editor->remove_cap('create_projects');
+
+        }
     }
 
     /**
@@ -105,15 +164,14 @@ class PSI_User {
      * @return array Modified query arguments.
      */
     public function modify_attachments_query($query) {
-        if (current_user_can('activate_plugins')) {
+        // If the current user is an admin, do not modify the query
+        if (current_user_can('administrator')) {
             return $query;
         }
 
-        if (self::is_staff_member() || self::is_staff_member_editor()) {
-            $user_id = get_current_user_id();
-            $query['author'] = $user_id;
-            $query['can_edit_attachments'] = true;
-        }
+        // For all non-admin users, limit the query to only show media files they uploaded
+        $user_id = get_current_user_id();
+        $query['author'] = $user_id;
 
         return $query;
     }
@@ -160,6 +218,33 @@ class PSI_User {
             exit;
         }
 
+    }
+
+    public function hide_admin_menus() {
+        if (!current_user_can('administrator')) {
+            // Remove 'Projects' menu item
+            remove_menu_page('edit.php?post_type=projects');
+            
+            remove_menu_page('wp-menu-icons');
+            
+            // Remove 'Tools' menu
+            remove_menu_page('tools.php');
+            
+            // Remove 'Comments' menu
+            remove_menu_page('edit-comments.php');
+            
+            // Remove 'Ninja Tables' menu item
+            remove_menu_page('ninja_tables');
+            
+            // Remove 'Settings' menu
+            remove_menu_page('options-general.php');
+
+            // Remove 'Tags' submenu under 'Posts'
+            remove_submenu_page('edit.php', 'edit-tags.php?taxonomy=post_tag');
+            
+            // Remove 'Categories' submenu under 'Posts'
+            remove_submenu_page('edit.php', 'edit-tags.php?taxonomy=category');
+        }
     }
 
     public static function generate_unique_user_slug($first_name, $last_name, $user_id = null) {

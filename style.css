@@ -1153,6 +1153,53 @@ img.table-profile-picture {
   border-radius: 5px;
 }
 
+.external-link-icon a::after {
+  font-size: 1em;
+  content: "\f08e"; /* Unicode for the Font Awesome external link icon */
+  font-family: "FontAwesome";
+  margin-left: 5px;
+  display: inline-block;
+}
+
+ul.social-share-buttons {
+  margin: 10px 0;
+  list-style: none;
+  display: flex;
+}
+ul.social-share-buttons li:first-child a {
+  margin-left: 0;
+}
+ul.social-share-buttons #facebook:hover {
+  background-color: #1e73be;
+}
+ul.social-share-buttons #twitter:hover {
+  background-color: #00acee;
+}
+ul.social-share-buttons #linkedin:hover {
+  background-color: #0077b5;
+}
+ul.social-share-buttons #pinterest:hover {
+  background-color: #c92228;
+}
+ul.social-share-buttons #email:hover {
+  background-color: #f1f1d4;
+}
+
+a.social-share-button {
+  margin: 0 5px;
+  height: 24px;
+  width: 24px;
+  background-color: #999999;
+  border-radius: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+}
+a.social-share-button i {
+  color: #ffffff;
+}
+
 /* Load more posts via AJAX on Press Releases and Cover Stories pages */
 #load-more-posts-container {
   display: grid;

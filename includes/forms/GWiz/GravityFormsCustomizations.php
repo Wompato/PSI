@@ -9,6 +9,9 @@ class GravityFormsCustomizations {
     
     public function __construct() {
         new GWPostPermalink();
+		GW_Advanced_Merge_Tags::gw_advanced_merge_tags( array(
+			'save_source_post_id' => false,
+		) );
         $this->initHooks();
     }
 

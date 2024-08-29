@@ -15,7 +15,38 @@ class ArticleManager {
             // Update "10000" to the maximum number of results that should be returned for the query populating this field.
             return 10000;
         }, 10, 2 );
+        /* add_filter( 'gppa_process_template_value', function( $template_value, $field, $template_name, $populate, $object, $object_type, $objects, $template ) {
+            if ( ! empty( $objects ) && strpos( $field->cssClass, 'gppa-populate-all' ) !== false ) {
+                $values = array( $template_value );
+                foreach ( $objects as $_object ) {
+                    if ( $_object === $object ) {
+                        continue;
+                    }
+                    $values[] = gp_populate_anything()->process_template( $field, $template_name, $_object, $populate, array() );
+                }
+                if (has_blocks($template_value)) {
+                    $template_value = do_blocks($template_value);
+                }
+            }
+            return $template_value;
+        }, 10, 8 );
+        
+        // Required by GPPA 2.0+ to ensure that all results are returned.
+        add_filter( 'gppa_query_all_value_objects', function( $should_query_all, $field ) {
+            if ( strpos( $field->cssClass, 'gppa-populate-all' ) !== false ) {
+                $should_query_all = true;
+            }
+            return $should_query_all;
+        }, 10, 2 );
+        add_filter( 'gform_rich_text_editor_options', function($editor_settings, $field_object, $form, $entry) {
+            $editor_settings['media_buttons'] = true;
+            return $editor_settings;
+        }, 10, 4); */
     }
+
+    
+    
+
 
     public function create_article($entry, $form) {
         $title = rgar( $entry, '37' ); 

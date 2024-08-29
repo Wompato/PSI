@@ -169,6 +169,8 @@ class PSI_Child_Theme {
     }
 
     public function enqueue_custom_scripts() {
+
+        wp_enqueue_style( 'font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css' );
         
         // JS for the user profile pages (only load if on the /profile/ route)
         if (is_page() && strpos($_SERVER['REQUEST_URI'], '/profile/') !== false) {

@@ -185,7 +185,6 @@ class FormHandler {
         
         // Check if $converted_time is false
         if ($converted_time === false) {
-            // Handle the case where $converted_time is false
             throw new \Exception('Invalid time format: ' . $time);
         }
     
